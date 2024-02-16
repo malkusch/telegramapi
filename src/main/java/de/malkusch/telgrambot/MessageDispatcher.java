@@ -9,8 +9,10 @@ import java.util.List;
 import com.pengrad.telegrambot.model.Update;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @RequiredArgsConstructor
+@Slf4j
 final class MessageDispatcher {
 
     private final Collection<Handler> handlers;
@@ -26,7 +28,14 @@ final class MessageDispatcher {
     private int dispatch(Update update) {
         var id = update.updateId();
         var message = message(update);
-        handlers.forEach(it -> it.handle(api, message));
+        for (var handler : handlers) {
+            try {
+                handler.handle(api, message);
+
+            } catch (Exception e) {
+                log.warn("Couldn't handle message {}", message, e);
+            }
+        }
         return id;
     }
 }

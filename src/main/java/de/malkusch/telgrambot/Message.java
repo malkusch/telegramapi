@@ -9,7 +9,7 @@ record MessageId(int id) {
 
 }
 
-sealed interface Message {
+public sealed interface Message {
 
     record TextMessage(MessageId id, String message, boolean fromBot) implements Message {
     }

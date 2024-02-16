@@ -59,6 +59,14 @@ public sealed interface Handler {
     public record CallbackHandler(Command command, Handling handler) implements Handler {
 
         public record Result(boolean disableButton, Optional<String> alert) {
+
+            public Result(boolean disableButton) {
+                this(disableButton, Optional.empty());
+            }
+
+            public Result(boolean disableButton, String alert) {
+                this(disableButton, Optional.of(alert));
+            }
         }
 
         @FunctionalInterface
