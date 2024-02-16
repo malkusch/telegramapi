@@ -9,4 +9,5 @@ on:
 jobs:
   build:
     uses: malkusch/github/.github/workflows/maven-build.yml@master
+    secrets: inherit
 
