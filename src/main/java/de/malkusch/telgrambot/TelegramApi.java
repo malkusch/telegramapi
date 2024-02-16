@@ -17,7 +17,7 @@ import de.malkusch.telgrambot.Message.CallbackMessage.Callback;
 import de.malkusch.telgrambot.Message.CallbackMessage.CallbackId;
 import okhttp3.OkHttpClient;
 
-final class TelegramApi implements AutoCloseable {
+public final class TelegramApi implements AutoCloseable {
 
     final TelegramBot api;
     private final String chatId;
