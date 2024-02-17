@@ -1,5 +1,7 @@
 package de.malkusch.telgrambot;
 
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
+
 import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
@@ -98,6 +100,15 @@ final class ConnectionMonitoring implements AutoCloseable {
 
     @Override
     public void close() throws Exception {
-        executor.close();
+        executor.shutdown();
+        var timeout = api.timeouts.monitoring().toMillis();
+        if (executor.awaitTermination(timeout, MILLISECONDS)) {
+            return;
+        }
+        log.warn("Failed shutting down scheduler. Forcing shutdown now!");
+        executor.shutdownNow();
+        if (!executor.awaitTermination(timeout, MILLISECONDS)) {
+            log.error("Forced shutdown failed");
+        }
     }
 }
