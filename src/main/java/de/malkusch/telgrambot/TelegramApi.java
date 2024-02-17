@@ -44,7 +44,7 @@ public final class TelegramApi implements AutoCloseable {
         var request = new GetUpdates() //
                 .timeout((int) pollingTimeout.toSeconds())
                 .allowedUpdates("message", "message_reaction", "callback_query");
-        api.setUpdatesListener(dispatcher::dispatch, request);
+        api.setUpdatesListener(dispatcher::dispatch, dispatcher, request);
     }
 
     public record Button(String name, Callback callback) {

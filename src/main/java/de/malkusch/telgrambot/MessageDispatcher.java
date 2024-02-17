@@ -6,6 +6,8 @@ import static de.malkusch.telgrambot.MessageFactory.message;
 import java.util.Collection;
 import java.util.List;
 
+import com.pengrad.telegrambot.ExceptionHandler;
+import com.pengrad.telegrambot.TelegramException;
 import com.pengrad.telegrambot.model.Update;
 
 import lombok.RequiredArgsConstructor;
@@ -13,7 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @RequiredArgsConstructor
 @Slf4j
-final class MessageDispatcher {
+final class MessageDispatcher implements ExceptionHandler {
 
     private final Collection<Handler> handlers;
     private final TelegramApi api;
@@ -37,5 +39,10 @@ final class MessageDispatcher {
             }
         }
         return id;
+    }
+
+    @Override
+    public void onException(TelegramException e) {
+        log.warn("Telegram update failed", e);
     }
 }
