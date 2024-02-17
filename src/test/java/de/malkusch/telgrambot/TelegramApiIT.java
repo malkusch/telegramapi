@@ -27,8 +27,7 @@ public class TelegramApiIT {
         assertTrue(token != null && chatId != null);
         assertTrue(!token.isBlank() && !chatId.isBlank());
 
-        var timeout = new TelegramApi.Timeouts(Duration.ofSeconds(3));
-        api = new TelegramApi(chatId, token, timeout);
+        api = new TelegramApi(chatId, token, Duration.ofSeconds(3));
     }
 
     @Test

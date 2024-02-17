@@ -41,7 +41,7 @@ public final class TelegramApi implements AutoCloseable {
         }
 
         public Duration updateSleep() {
-            return multiply(monitoring().minus(polling), 0.8);
+            return io();
         }
 
         public Duration ping() {
@@ -55,6 +55,10 @@ public final class TelegramApi implements AutoCloseable {
         private static Duration multiply(Duration duration, double factor) {
             return Duration.ofMillis(round(duration.toMillis() * factor));
         }
+    }
+
+    public TelegramApi(String chatId, String token, Duration timeout) {
+        this(chatId, token, new Timeouts(timeout));
     }
 
     public TelegramApi(String chatId, String token, Timeouts timeouts) {
