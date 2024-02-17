@@ -1,5 +1,7 @@
 package de.malkusch.telgrambot;
 
+import static java.lang.Math.round;
+
 import java.time.Duration;
 import java.util.Collection;
 
@@ -21,30 +23,72 @@ public final class TelegramApi implements AutoCloseable {
 
     final TelegramBot api;
     private final String chatId;
+    final Timeouts timeouts;
+    private final ConnectionMonitoring monitor;
 
-    public TelegramApi(String chatId, String token, Duration timeout) {
-        this.api = buildApi(token, timeout);
-        this.chatId = chatId;
+    public record Timeouts(Duration io, Duration polling) {
+
+        public Timeouts(Duration io) {
+            this(io, multiply(io, 10));
+        }
+
+        public Duration monitoring() {
+            return polling(2);
+        }
+
+        public Duration call() {
+            return polling(1.2);
+        }
+
+        public Duration updateSleep() {
+            return multiply(monitoring().minus(polling), 0.8);
+        }
+
+        public Duration ping() {
+            return polling(0.8);
+        }
+
+        private Duration polling(double factor) {
+            return multiply(polling, factor);
+        }
+
+        private static Duration multiply(Duration duration, double factor) {
+            return Duration.ofMillis(round(duration.toMillis() * factor));
+        }
     }
 
-    private static TelegramBot buildApi(String token, Duration timeout) {
+    public TelegramApi(String chatId, String token, Timeouts timeouts) {
+        this.chatId = chatId;
+        this.timeouts = timeouts;
+        monitor = new ConnectionMonitoring(this);
+        this.api = buildApi(token);
+
+    }
+
+    private TelegramBot buildApi(String token) {
         var http = new OkHttpClient.Builder() //
-                .connectTimeout(timeout) //
-                .writeTimeout(timeout) //
-                .readTimeout(timeout) //
+                .callTimeout(timeouts.call()) //
+                .pingInterval(timeouts.ping()) //
+                .connectTimeout(timeouts.io()) //
+                .writeTimeout(timeouts.io()) //
+                .readTimeout(timeouts.io()) //
+                .retryOnConnectionFailure(true) //
+                .addInterceptor(monitor.interceptor()) //
                 .build();
 
         return new TelegramBot.Builder(token) //
                 .okHttpClient(http) //
+                .updateListenerSleep(timeouts.updateSleep().toMillis()) //
                 .build();
     }
 
-    public void startDispatcher(Collection<Handler> handlers, Duration pollingTimeout) {
+    public void startDispatcher(Collection<Handler> handlers) {
         var dispatcher = new MessageDispatcher(handlers, this);
+
         var request = new GetUpdates() //
-                .timeout((int) pollingTimeout.toSeconds())
+                .timeout((int) timeouts.polling.toSeconds())
                 .allowedUpdates("message", "message_reaction", "callback_query");
-        api.setUpdatesListener(dispatcher::dispatch, dispatcher, request);
+        api.setUpdatesListener(monitor.updateListener(dispatcher), monitor.exceptionHandler(dispatcher), request);
     }
 
     public record Button(String name, Callback callback) {
@@ -97,11 +141,15 @@ public final class TelegramApi implements AutoCloseable {
 
     @Override
     public void close() throws Exception {
-        try {
-            api.removeGetUpdatesListener();
+        try (monitor) {
 
         } finally {
-            api.shutdown();
+            try {
+                api.removeGetUpdatesListener();
+
+            } finally {
+                api.shutdown();
+            }
         }
     }
 }

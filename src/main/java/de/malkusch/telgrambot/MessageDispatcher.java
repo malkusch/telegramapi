@@ -1,6 +1,5 @@
 package de.malkusch.telgrambot;
 
-import static com.pengrad.telegrambot.UpdatesListener.CONFIRMED_UPDATES_ALL;
 import static de.malkusch.telgrambot.MessageFactory.message;
 
 import java.util.Collection;
@@ -8,6 +7,7 @@ import java.util.List;
 
 import com.pengrad.telegrambot.ExceptionHandler;
 import com.pengrad.telegrambot.TelegramException;
+import com.pengrad.telegrambot.UpdatesListener;
 import com.pengrad.telegrambot.model.Update;
 
 import lombok.RequiredArgsConstructor;
@@ -15,12 +15,14 @@ import lombok.extern.slf4j.Slf4j;
 
 @RequiredArgsConstructor
 @Slf4j
-final class MessageDispatcher implements ExceptionHandler {
+final class MessageDispatcher implements ExceptionHandler, UpdatesListener {
 
     private final Collection<Handler> handlers;
     private final TelegramApi api;
 
-    int dispatch(List<Update> updates) {
+    @Override
+    public int process(List<Update> updates) {
+        log.debug("Received {} updates", updates.size());
         return updates.stream() //
                 .mapToInt(this::dispatch) //
                 .reduce((first, second) -> second) //
