@@ -65,6 +65,10 @@ public sealed interface Handler {
                 this(disableButton, Optional.empty(), Optional.empty());
             }
 
+            public Result(boolean disableButton, de.malkusch.telgrambot.TelegramApi.Reaction reaction) {
+                this(disableButton, Optional.empty(), Optional.of(reaction));
+            }
+
             public Result(boolean disableButton, String alert) {
                 this(disableButton, Optional.of(alert), Optional.empty());
             }
