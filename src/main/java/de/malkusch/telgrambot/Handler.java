@@ -58,14 +58,15 @@ public sealed interface Handler {
 
     public record CallbackHandler(Command command, Handling handler) implements Handler {
 
-        public record Result(boolean disableButton, Optional<String> alert) {
+        public record Result(boolean disableButton, Optional<String> alert,
+                Optional<de.malkusch.telgrambot.TelegramApi.Reaction> reaction) {
 
             public Result(boolean disableButton) {
-                this(disableButton, Optional.empty());
+                this(disableButton, Optional.empty(), Optional.empty());
             }
 
             public Result(boolean disableButton, String alert) {
-                this(disableButton, Optional.of(alert));
+                this(disableButton, Optional.of(alert), Optional.empty());
             }
         }
 
@@ -83,12 +84,17 @@ public sealed interface Handler {
                 return;
             }
             var result = handler.handle(api, cm);
+
             result.alert.ifPresentOrElse( //
                     alert -> api.answer(cm.callbackId(), alert), //
                     () -> api.answer(cm.callbackId()));
+
             if (result.disableButton) {
                 api.disableButton(cm.id());
             }
+
+            result.reaction.ifPresent( //
+                    reaction -> api.react(cm.id(), reaction));
         }
     }
 }

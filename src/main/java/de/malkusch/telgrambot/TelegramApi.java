@@ -6,6 +6,7 @@ import java.time.Duration;
 import java.util.Collection;
 
 import com.pengrad.telegrambot.TelegramBot;
+import com.pengrad.telegrambot.model.reaction.ReactionTypeEmoji;
 import com.pengrad.telegrambot.model.request.InlineKeyboardButton;
 import com.pengrad.telegrambot.model.request.InlineKeyboardMarkup;
 import com.pengrad.telegrambot.request.AnswerCallbackQuery;
@@ -13,6 +14,7 @@ import com.pengrad.telegrambot.request.BaseRequest;
 import com.pengrad.telegrambot.request.EditMessageReplyMarkup;
 import com.pengrad.telegrambot.request.GetUpdates;
 import com.pengrad.telegrambot.request.SendMessage;
+import com.pengrad.telegrambot.request.SetMessageReaction;
 import com.pengrad.telegrambot.response.BaseResponse;
 
 import de.malkusch.telgrambot.Message.CallbackMessage.Callback;
@@ -112,6 +114,14 @@ public final class TelegramApi implements AutoCloseable {
         } catch (Exception e) {
             // Ignore
         }
+    }
+
+    public static record Reaction(String emoji) {
+        public static final Reaction THUMBS_UP = new Reaction("👍");
+    }
+
+    public void react(MessageId messageId, Reaction reaction) {
+        execute(new SetMessageReaction(chatId, messageId.id(), new ReactionTypeEmoji(reaction.emoji)));
     }
 
     public void answer(CallbackId id) {
