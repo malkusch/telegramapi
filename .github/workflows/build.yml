@@ -10,10 +10,3 @@ jobs:
   build:
     uses: malkusch/github/.github/workflows/maven-build.yml@master
     secrets: inherit
-
-  xxx:
-    runs-on: ubuntu-latest
-    steps:
-      - name: xxx
-        run: env
-
