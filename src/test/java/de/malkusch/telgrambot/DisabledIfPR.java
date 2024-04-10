@@ -3,9 +3,9 @@ package de.malkusch.telgrambot;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
-import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
+import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 
-@DisabledIfEnvironmentVariable(named = "GITHUB_EVENT_NAME", matches = "pull_request")
+@EnabledIfEnvironmentVariable(named = "GITHUB_TRIGGERING_ACTOR", matches = "malkusch")
 @Retention(RetentionPolicy.RUNTIME)
 public @interface DisabledIfPR {
 
