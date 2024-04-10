@@ -15,5 +15,5 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: xxx
-        run: echo $GITHUB_EVENT_NAME
+        run: env
 
