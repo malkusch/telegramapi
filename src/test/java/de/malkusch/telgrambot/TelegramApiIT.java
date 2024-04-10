@@ -9,13 +9,14 @@ import java.time.LocalDateTime;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
 
 import com.pengrad.telegrambot.request.DeleteMessage;
 import com.pengrad.telegrambot.request.GetChat;
 import com.pengrad.telegrambot.request.PinChatMessage;
 import com.pengrad.telegrambot.request.UnpinChatMessage;
 
-@DisabledIfPR
+@DisabledIfEnvironmentVariable(named = "GITHUB_EVENT_NAME", matches = "pull_request")
 public class TelegramApiIT {
 
     private final String chatId = System.getenv("TELEGRAM_CHAT_ID");
