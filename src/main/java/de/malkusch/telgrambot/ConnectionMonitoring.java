@@ -31,10 +31,19 @@ final class ConnectionMonitoring implements AutoCloseable {
             t.setDaemon(true);
             return t;
         });
-        start();
     }
 
-    private void start() {
+    private volatile boolean started = false;
+    private final Object lock = new Object();
+
+    public void startMonitoring() {
+        synchronized (lock) {
+            if (started) {
+                return;
+            }
+            started = true;
+        }
+
         var interval = api.timeouts.monitoring().toMillis();
         executor.scheduleAtFixedRate(this::checkConnection, interval, interval, TimeUnit.MILLISECONDS);
     }
@@ -100,6 +109,12 @@ final class ConnectionMonitoring implements AutoCloseable {
 
     @Override
     public void close() throws Exception {
+        synchronized (lock) {
+            if (!started) {
+                return;
+            }
+        }
+
         executor.shutdown();
         var timeout = api.timeouts.monitoring().toMillis();
         if (executor.awaitTermination(timeout, MILLISECONDS)) {
