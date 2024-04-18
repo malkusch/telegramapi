@@ -32,6 +32,10 @@ public sealed interface Message {
         
         public record Callback(Command command, String data) {
 
+            public Callback(Command command) {
+                this(command, "null");
+            }
+            
             public static Callback parse(String callback) {
                 var parsed = callback.split(":", 2);
                 var command = new Command(parsed[0]);

@@ -106,6 +106,10 @@ public final class TelegramApi implements AutoCloseable {
     }
 
     public record Button(String name, Callback callback) {
+
+        public Button(String name, Command command) {
+            this(name, new Callback(command));
+        }
     }
 
     public MessageId send(String message, Button button) {
