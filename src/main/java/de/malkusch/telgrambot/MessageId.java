@@ -1,5 +1,5 @@
 package de.malkusch.telgrambot;
 
-record MessageId(int id) {
+public record MessageId(int id) {
 
 }
