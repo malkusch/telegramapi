@@ -3,6 +3,7 @@ package de.malkusch.telgrambot;
 import static java.lang.Math.round;
 
 import java.time.Duration;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Optional;
 
@@ -112,9 +113,12 @@ public final class TelegramApi implements AutoCloseable {
         }
     }
 
-    public MessageId send(String message, Button button) {
-        var requestButton = new InlineKeyboardButton(button.name).callbackData(button.callback.toString());
-        var keyboard = new InlineKeyboardMarkup(requestButton);
+    public MessageId send(String message, Button... buttons) {
+        var requestButtons = Arrays.stream(buttons) //
+                .map(it -> new InlineKeyboardButton(it.name).callbackData(it.callback.toString())) //
+                .toArray(InlineKeyboardButton[]::new);
+
+        var keyboard = new InlineKeyboardMarkup(requestButtons);
         var request = new SendMessage(chatId, message).replyMarkup(keyboard);
         return send(request);
     }
