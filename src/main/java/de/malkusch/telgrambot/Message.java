@@ -2,13 +2,6 @@ package de.malkusch.telgrambot;
 
 import java.util.List;
 
-import de.malkusch.telgrambot.Message.CallbackMessage.Callback;
-import de.malkusch.telgrambot.Message.ReactionMessage.Reaction;
-
-record MessageId(int id) {
-
-}
-
 public sealed interface Message {
 
     record TextMessage(MessageId id, String message, boolean fromBot) implements Message {
@@ -29,13 +22,13 @@ public sealed interface Message {
 
         public record CallbackId(String id) {
         }
-        
+
         public record Callback(Command command, String data) {
 
             public Callback(Command command) {
                 this(command, "null");
             }
-            
+
             public static Callback parse(String callback) {
                 var parsed = callback.split(":", 2);
                 var command = new Command(parsed[0]);
