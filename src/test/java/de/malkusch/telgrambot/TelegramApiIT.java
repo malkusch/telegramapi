@@ -10,10 +10,7 @@ import java.time.LocalDateTime;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import com.pengrad.telegrambot.request.DeleteMessage;
 import com.pengrad.telegrambot.request.GetChat;
-import com.pengrad.telegrambot.request.PinChatMessage;
-import com.pengrad.telegrambot.request.UnpinChatMessage;
 
 @DisabledIfPR
 public class TelegramApiIT {
@@ -37,11 +34,11 @@ public class TelegramApiIT {
         var id = api.send(message);
 
         assertEquals(message, fetchMessage(id));
-        delete(id);
+        api.delete(id);
     }
 
     private String fetchMessage(MessageId messageId) {
-        api.execute(new PinChatMessage(chatId, messageId.id()));
+        api.pin(messageId);
         try {
             var request = new GetChat(chatId);
             var response = api.execute(request);
@@ -52,12 +49,7 @@ public class TelegramApiIT {
             return lastMessage;
 
         } finally {
-            api.execute(new UnpinChatMessage(chatId).messageId(messageId.id()));
+            api.unpin(messageId);
         }
-    }
-
-    private void delete(MessageId messageId) {
-        var request = new DeleteMessage(chatId, messageId.id());
-        api.execute(request);
     }
 }

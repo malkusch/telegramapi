@@ -4,17 +4,23 @@ import static java.lang.Math.round;
 
 import java.time.Duration;
 import java.util.Collection;
+import java.util.Optional;
 
 import com.pengrad.telegrambot.TelegramBot;
+import com.pengrad.telegrambot.model.Chat;
 import com.pengrad.telegrambot.model.reaction.ReactionTypeEmoji;
 import com.pengrad.telegrambot.model.request.InlineKeyboardButton;
 import com.pengrad.telegrambot.model.request.InlineKeyboardMarkup;
 import com.pengrad.telegrambot.request.AnswerCallbackQuery;
 import com.pengrad.telegrambot.request.BaseRequest;
+import com.pengrad.telegrambot.request.DeleteMessage;
 import com.pengrad.telegrambot.request.EditMessageReplyMarkup;
+import com.pengrad.telegrambot.request.GetChat;
 import com.pengrad.telegrambot.request.GetUpdates;
+import com.pengrad.telegrambot.request.PinChatMessage;
 import com.pengrad.telegrambot.request.SendMessage;
 import com.pengrad.telegrambot.request.SetMessageReaction;
+import com.pengrad.telegrambot.request.UnpinChatMessage;
 import com.pengrad.telegrambot.response.BaseResponse;
 
 import de.malkusch.telgrambot.Message.CallbackMessage.Callback;
@@ -107,6 +113,26 @@ public final class TelegramApi implements AutoCloseable {
         var keyboard = new InlineKeyboardMarkup(requestButton);
         var request = new SendMessage(chatId, message).replyMarkup(keyboard);
         return send(request);
+    }
+
+    public void pin(MessageId message) {
+        execute(new PinChatMessage(chatId, message.id()));
+    }
+
+    public Optional<MessageId> pinned() {
+        var response = api.execute(new GetChat(chatId));
+        return Optional.ofNullable(response.chat()) //
+                .map(Chat::pinnedMessage) //
+                .map(com.pengrad.telegrambot.model.Message::messageId) //
+                .map(MessageId::new);
+    }
+
+    public void unpin(MessageId message) {
+        execute(new UnpinChatMessage(chatId).messageId(message.id()));
+    }
+
+    public void delete(MessageId message) {
+        execute(new DeleteMessage(chatId, message.id()));
     }
 
     public void disableButton(MessageId messageId) {
