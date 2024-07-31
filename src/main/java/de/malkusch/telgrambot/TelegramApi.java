@@ -8,7 +8,7 @@ import java.util.Collection;
 import java.util.Optional;
 
 import com.pengrad.telegrambot.TelegramBot;
-import com.pengrad.telegrambot.model.Chat;
+import com.pengrad.telegrambot.model.ChatFullInfo;
 import com.pengrad.telegrambot.model.reaction.ReactionTypeEmoji;
 import com.pengrad.telegrambot.model.request.InlineKeyboardButton;
 import com.pengrad.telegrambot.model.request.InlineKeyboardMarkup;
@@ -130,7 +130,7 @@ public final class TelegramApi implements AutoCloseable {
     public Optional<MessageId> pinned() {
         var response = api.execute(new GetChat(chatId));
         return Optional.ofNullable(response.chat()) //
-                .map(Chat::pinnedMessage) //
+                .map(ChatFullInfo::pinnedMessage) //
                 .map(com.pengrad.telegrambot.model.Message::messageId) //
                 .map(MessageId::new);
     }
