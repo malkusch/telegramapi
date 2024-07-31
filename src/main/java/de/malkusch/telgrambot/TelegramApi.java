@@ -1,32 +1,22 @@
 package de.malkusch.telgrambot;
 
-import static java.lang.Math.round;
+import com.pengrad.telegrambot.TelegramBot;
+import com.pengrad.telegrambot.model.ChatFullInfo;
+import com.pengrad.telegrambot.model.reaction.ReactionTypeEmoji;
+import com.pengrad.telegrambot.model.request.InlineKeyboardButton;
+import com.pengrad.telegrambot.model.request.InlineKeyboardMarkup;
+import com.pengrad.telegrambot.request.*;
+import com.pengrad.telegrambot.response.BaseResponse;
+import de.malkusch.telgrambot.Message.CallbackMessage.Callback;
+import de.malkusch.telgrambot.Message.CallbackMessage.CallbackId;
+import okhttp3.OkHttpClient;
 
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Optional;
 
-import com.pengrad.telegrambot.TelegramBot;
-import com.pengrad.telegrambot.model.ChatFullInfo;
-import com.pengrad.telegrambot.model.reaction.ReactionTypeEmoji;
-import com.pengrad.telegrambot.model.request.InlineKeyboardButton;
-import com.pengrad.telegrambot.model.request.InlineKeyboardMarkup;
-import com.pengrad.telegrambot.request.AnswerCallbackQuery;
-import com.pengrad.telegrambot.request.BaseRequest;
-import com.pengrad.telegrambot.request.DeleteMessage;
-import com.pengrad.telegrambot.request.EditMessageReplyMarkup;
-import com.pengrad.telegrambot.request.GetChat;
-import com.pengrad.telegrambot.request.GetUpdates;
-import com.pengrad.telegrambot.request.PinChatMessage;
-import com.pengrad.telegrambot.request.SendMessage;
-import com.pengrad.telegrambot.request.SetMessageReaction;
-import com.pengrad.telegrambot.request.UnpinChatMessage;
-import com.pengrad.telegrambot.response.BaseResponse;
-
-import de.malkusch.telgrambot.Message.CallbackMessage.Callback;
-import de.malkusch.telgrambot.Message.CallbackMessage.CallbackId;
-import okhttp3.OkHttpClient;
+import static java.lang.Math.round;
 
 public final class TelegramApi implements AutoCloseable {
 
@@ -34,6 +24,10 @@ public final class TelegramApi implements AutoCloseable {
     private final String chatId;
     final Timeouts timeouts;
     private final ConnectionMonitoring monitor;
+
+    private final RateLimiter groupLimit;
+    private final RateLimiter messageLimit;
+    private final RateLimiter pinLimit;
 
     public record Timeouts(Duration io, Duration polling) {
 
@@ -49,6 +43,18 @@ public final class TelegramApi implements AutoCloseable {
             return polling(1.2);
         }
 
+        public Duration groupThrottle() {
+            return polling(1.1);
+        }
+
+        public Duration messageThrottle() {
+            return polling(1.1);
+        }
+
+        public Duration pinThrottle() {
+            return io(2);
+        }
+
         public Duration updateSleep() {
             return io();
         }
@@ -59,6 +65,10 @@ public final class TelegramApi implements AutoCloseable {
 
         private Duration polling(double factor) {
             return multiply(polling, factor);
+        }
+
+        private Duration io(double factor) {
+            return multiply(io, factor);
         }
 
         private static Duration multiply(Duration duration, double factor) {
@@ -74,11 +84,15 @@ public final class TelegramApi implements AutoCloseable {
         this.chatId = chatId;
         this.timeouts = timeouts;
         monitor = new ConnectionMonitoring(this);
+        groupLimit = new RateLimiter(Duration.ofMinutes(1), 19, timeouts.groupThrottle(), "group");
+        messageLimit = new RateLimiter(Duration.ofSeconds(1), 29, timeouts.messageThrottle(), "group");
+        pinLimit = new RateLimiter(Duration.ofSeconds(5), 2, timeouts.pinThrottle(), "group");
         this.api = buildApi(token);
 
     }
 
     private TelegramBot buildApi(String token) {
+
         var http = new OkHttpClient.Builder() //
                 .callTimeout(timeouts.call()) //
                 .pingInterval(timeouts.ping()) //
@@ -100,6 +114,7 @@ public final class TelegramApi implements AutoCloseable {
 
         var request = new GetUpdates() //
                 .timeout((int) timeouts.polling.toSeconds())
+
                 .allowedUpdates("message", "message_reaction", "callback_query");
 
         monitor.startMonitoring();
@@ -124,10 +139,12 @@ public final class TelegramApi implements AutoCloseable {
     }
 
     public void pin(MessageId message) {
+        pinLimit.acquire();
         execute(new PinChatMessage(chatId, message.id()));
     }
 
     public Optional<MessageId> pinned() {
+        pinLimit.acquire();
         var response = api.execute(new GetChat(chatId));
         return Optional.ofNullable(response.chat()) //
                 .map(ChatFullInfo::pinnedMessage) //
@@ -136,7 +153,13 @@ public final class TelegramApi implements AutoCloseable {
     }
 
     public void unpin(MessageId message) {
+        pinLimit.acquire();
         execute(new UnpinChatMessage(chatId).messageId(message.id()));
+    }
+
+    public void unpin() {
+        pinLimit.acquire();
+        execute(new UnpinAllChatMessages(chatId));
     }
 
     public void delete(MessageId message) {
@@ -180,7 +203,15 @@ public final class TelegramApi implements AutoCloseable {
         return new MessageId(response.message().messageId());
     }
 
+    public void dropPendingUpdates() {
+        var request = new DeleteWebhook() //
+                .dropPendingUpdates(true);
+        execute(request);
+    }
+
     <T extends BaseRequest<T, R>, R extends BaseResponse> R execute(BaseRequest<T, R> request) {
+        messageLimit.acquire();
+        groupLimit.acquire();
         var response = api.execute(request);
         if (!response.isOk()) {
             var error = String.format("Sending to Telegram failed: %d", response.errorCode());
@@ -191,7 +222,7 @@ public final class TelegramApi implements AutoCloseable {
 
     @Override
     public void close() throws Exception {
-        try (monitor) {
+        try (monitor; groupLimit; messageLimit; pinLimit) {
 
         } finally {
             try {
