@@ -54,7 +54,7 @@ public final class TelegramApi implements AutoCloseable {
         }
 
         public Duration pinThrottle() {
-            return io(2);
+            return polling(0.5);
         }
 
         public Duration updateSleep() {

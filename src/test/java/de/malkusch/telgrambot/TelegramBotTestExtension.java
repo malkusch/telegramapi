@@ -1,6 +1,7 @@
 package de.malkusch.telgrambot;
 
-import org.junit.jupiter.api.extension.AfterEachCallback;
+import org.junit.jupiter.api.extension.AfterAllCallback;
+import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 
@@ -12,20 +13,22 @@ import java.util.function.Function;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisabledIfPR
-public class TelegramBotTestExtension implements BeforeEachCallback, AfterEachCallback {
+public class TelegramBotTestExtension implements BeforeAllCallback, BeforeEachCallback, AfterAllCallback {
 
     private final String chatId = System.getenv("TELEGRAM_CHAT_ID");
     private final String token = System.getenv("TELEGRAM_TOKEN");
-
     public TelegramApi api;
 
-
     @Override
-    public void beforeEach(ExtensionContext context) throws Exception {
+    public void beforeAll(ExtensionContext context) throws Exception {
         assertTrue(token != null && chatId != null);
         assertTrue(!token.isBlank() && !chatId.isBlank());
 
         api = new TelegramApi(chatId, token, Duration.ofSeconds(10));
+    }
+
+    @Override
+    public void beforeEach(ExtensionContext context) throws Exception {
         api.unpin();
         api.dropPendingUpdates();
     }
@@ -39,7 +42,7 @@ public class TelegramBotTestExtension implements BeforeEachCallback, AfterEachCa
     }
 
     @Override
-    public void afterEach(ExtensionContext context) throws Exception {
+    public void afterAll(ExtensionContext context) throws Exception {
         try (var closing = api) {
             api.unpin();
             api.delete(messages);
@@ -57,4 +60,5 @@ public class TelegramBotTestExtension implements BeforeEachCallback, AfterEachCa
             api.unpin(messageId);
         }
     }
+
 }
