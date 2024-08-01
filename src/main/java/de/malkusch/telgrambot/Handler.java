@@ -1,18 +1,17 @@
 package de.malkusch.telgrambot;
 
-import java.util.Optional;
-
-import de.malkusch.telgrambot.Handler.TextHandler.Handling;
 import de.malkusch.telgrambot.Message.CallbackMessage;
 import de.malkusch.telgrambot.Message.ReactionMessage;
 import de.malkusch.telgrambot.Message.ReactionMessage.Reaction;
 import de.malkusch.telgrambot.Message.TextMessage;
 
+import java.util.Optional;
+
 public sealed interface Handler {
 
     void handle(TelegramApi api, Message message);
 
-    public record TextHandler(Command command, Handling handler) implements Handler {
+    record TextHandler(Command command, Handling handler) implements Handler {
 
         @FunctionalInterface
         public interface Handling {
@@ -34,7 +33,7 @@ public sealed interface Handler {
         }
     }
 
-    public record ReactionHandler(Reaction reaction, Handling handler) implements Handler {
+    record ReactionHandler(Reaction reaction, Handling handler) implements Handler {
 
         @FunctionalInterface
         public interface Handling {
@@ -56,10 +55,10 @@ public sealed interface Handler {
         }
     }
 
-    public record CallbackHandler(Command command, Handling handler) implements Handler {
+    record CallbackHandler(Command command, Handling handler) implements Handler {
 
         public record Result(boolean disableButton, Optional<String> alert,
-                Optional<de.malkusch.telgrambot.TelegramApi.Reaction> reaction) {
+                             Optional<de.malkusch.telgrambot.TelegramApi.Reaction> reaction) {
 
             public Result(boolean disableButton) {
                 this(disableButton, Optional.empty(), Optional.empty());
