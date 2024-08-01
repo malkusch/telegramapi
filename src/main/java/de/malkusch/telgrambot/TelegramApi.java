@@ -150,7 +150,7 @@ public final class TelegramApi implements AutoCloseable {
 
     public PinnedMessage pinned() {
         pinLimit.acquire();
-        var response = api.execute(new GetChat(chatId));
+        var response = execute(new GetChat(chatId));
         return pinnedMessage(response.chat());
     }
 

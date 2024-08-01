@@ -27,17 +27,16 @@ public sealed interface PinnedMessage {
 
         record Button(String name, String callback) {
 
-            Button( TelegramApi.Button button) {
+            Button(TelegramApi.Button button) {
                 this(button.name(), button.callback().toString());
             }
 
         }
     }
 
-    public static NoMessage NO_MESSAGE = new NoMessage();
+    NoMessage NO_MESSAGE = new NoMessage();
 
     record NoMessage() implements PinnedMessage {
-
     }
 
     static PinnedMessage pinnedMessage(ChatFullInfo chat) {
