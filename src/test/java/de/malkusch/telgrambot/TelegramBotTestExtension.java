@@ -1,9 +1,6 @@
 package de.malkusch.telgrambot;
 
-import org.junit.jupiter.api.extension.AfterAllCallback;
-import org.junit.jupiter.api.extension.BeforeAllCallback;
-import org.junit.jupiter.api.extension.BeforeEachCallback;
-import org.junit.jupiter.api.extension.ExtensionContext;
+import org.junit.jupiter.api.extension.*;
 
 import java.time.Duration;
 import java.util.List;
@@ -11,13 +8,26 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Function;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.extension.ConditionEvaluationResult.disabled;
+import static org.junit.jupiter.api.extension.ConditionEvaluationResult.enabled;
 
-@DisabledIfPR
-public class TelegramBotTestExtension implements BeforeAllCallback, BeforeEachCallback, AfterAllCallback {
+public class TelegramBotTestExtension implements BeforeAllCallback, BeforeEachCallback, AfterAllCallback, ExecutionCondition {
 
     private final String chatId = System.getenv("TELEGRAM_CHAT_ID");
     private final String token = System.getenv("TELEGRAM_TOKEN");
     public TelegramApi api;
+
+    @Override
+    public ConditionEvaluationResult evaluateExecutionCondition(ExtensionContext context) {
+        var actor = System.getenv("GITHUB_TRIGGERING_ACTOR");
+        if (actor != null && actor.equals("malkusch")) {
+            return enabled("GITHUB_TRIGGERING_ACTOR=" + actor);
+        }
+        if (token != null) {
+            return enabled("TELEGRAM_TOKEN given");
+        }
+        return disabled("GITHUB_TRIGGERING_ACTOR=" + actor);
+    }
 
     @Override
     public void beforeAll(ExtensionContext context) throws Exception {
@@ -60,5 +70,4 @@ public class TelegramBotTestExtension implements BeforeAllCallback, BeforeEachCa
             api.unpin(messageId);
         }
     }
-
 }
