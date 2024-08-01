@@ -1,16 +1,18 @@
 package de.malkusch.telgrambot;
 
 import de.malkusch.telgrambot.Message.CallbackMessage.Callback;
+import de.malkusch.telgrambot.PinnedMessage.CallbackMessage;
+import de.malkusch.telgrambot.PinnedMessage.TextMessage;
 import de.malkusch.telgrambot.TelegramApi.Button;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import java.time.LocalDateTime;
 
+import static de.malkusch.telgrambot.PinnedMessage.NO_MESSAGE;
 import static de.malkusch.telgrambot.TelegramApi.Reaction.THUMBS_UP;
 import static java.util.UUID.randomUUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 
 public class TelegramApiIT {
 
@@ -23,7 +25,7 @@ public class TelegramApiIT {
 
         var id = telegram.send(api -> api.send(message));
 
-        assertEquals(message, telegram.fetchMessage(id));
+        assertEquals(new TextMessage(id, message), telegram.fetchMessage(id));
     }
 
     @Test
@@ -34,7 +36,19 @@ public class TelegramApiIT {
 
         var id = telegram.send(api -> api.send(message, button1, button2));
 
-        assertEquals(message, telegram.fetchMessage(id));
+        assertEquals(new CallbackMessage(id, message, button1, button2), telegram.fetchMessage(id));
+    }
+
+    @Test
+    public void shouldDisableButtons() {
+        var message = String.format("shouldDisableButtons %s %s", LocalDateTime.now(), randomUUID());
+        var button1 = new Button("button1", new Callback(new Command("command1"), "payload"));
+        var button2 = new Button("button2", new Command("command2"));
+        var id = telegram.send(api -> api.send(message, button1, button2));
+
+        telegram.api.disableButton(id);
+
+        assertEquals(new TextMessage(id, message), telegram.fetchMessage(id));
     }
 
     @Test
@@ -52,9 +66,8 @@ public class TelegramApiIT {
 
         telegram.api.pin(id);
 
-        var pinned = telegram.api.pinned().get();
-        assertEquals(id, pinned.id());
-        assertEquals(message, pinned.message());
+        var pinned = telegram.api.pinned();
+        assertEquals(new TextMessage(id, message), pinned);
     }
 
     @Test
@@ -66,7 +79,7 @@ public class TelegramApiIT {
         telegram.api.unpin(id);
 
         var pinned = telegram.api.pinned();
-        assertFalse(pinned.isPresent());
+        assertEquals(NO_MESSAGE, pinned);
     }
 
     @Test
@@ -79,7 +92,6 @@ public class TelegramApiIT {
         telegram.api.unpin();
 
         var pinned = telegram.api.pinned();
-        assertFalse(pinned.isPresent());
+        assertEquals(NO_MESSAGE, pinned);
     }
-
 }

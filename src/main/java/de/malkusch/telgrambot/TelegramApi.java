@@ -1,7 +1,6 @@
 package de.malkusch.telgrambot;
 
 import com.pengrad.telegrambot.TelegramBot;
-import com.pengrad.telegrambot.model.ChatFullInfo;
 import com.pengrad.telegrambot.model.reaction.ReactionTypeEmoji;
 import com.pengrad.telegrambot.model.request.InlineKeyboardButton;
 import com.pengrad.telegrambot.model.request.InlineKeyboardMarkup;
@@ -9,14 +8,13 @@ import com.pengrad.telegrambot.request.*;
 import com.pengrad.telegrambot.response.BaseResponse;
 import de.malkusch.telgrambot.Message.CallbackMessage.Callback;
 import de.malkusch.telgrambot.Message.CallbackMessage.CallbackId;
-import de.malkusch.telgrambot.Message.TextMessage;
 import okhttp3.OkHttpClient;
 
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Optional;
 
+import static de.malkusch.telgrambot.PinnedMessage.pinnedMessage;
 import static java.lang.Math.round;
 import static java.util.Arrays.asList;
 
@@ -150,20 +148,10 @@ public final class TelegramApi implements AutoCloseable {
         execute(pin);
     }
 
-    public Optional<TextMessage> pinned() {
+    public PinnedMessage pinned() {
         pinLimit.acquire();
         var response = api.execute(new GetChat(chatId));
-        return Optional.ofNullable(response.chat()) //
-                .map(ChatFullInfo::pinnedMessage) //
-                .map(it -> {
-                    var id = new MessageId(it.messageId());
-                    var text = it.text();
-                    var fromBot = it.viaBot() != null || it.from() != null && it.from().isBot();
-                    if (text == null) {
-                        return null;
-                    }
-                    return new TextMessage(id, text, fromBot);
-                });
+        return pinnedMessage(response.chat());
     }
 
     public void unpin(MessageId message) {

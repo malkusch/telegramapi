@@ -51,10 +51,10 @@ public class TelegramBotTestExtension implements BeforeAllCallback, BeforeEachCa
         }
     }
 
-    public String fetchMessage(MessageId messageId) {
+    public PinnedMessage fetchMessage(MessageId messageId) {
         api.pin(messageId);
         try {
-            return api.pinned().map(Message.TextMessage::message).orElse(null);
+            return api.pinned();
 
         } finally {
             api.unpin(messageId);
