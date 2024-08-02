@@ -28,6 +28,11 @@ public abstract class AbstractTelegramApiProxy implements TelegramApi {
     }
 
     @Override
+    public void startDispatcher(Handler... handlers) {
+        delegateVoid(api -> api.startDispatcher(handlers));
+    }
+
+    @Override
     public void startDispatcher(Collection<Handler> handlers) {
         delegateVoid(api -> api.startDispatcher(handlers));
     }
