@@ -68,14 +68,13 @@ public interface UpdateReceiver {
     interface CallbackReceiver {
         CallbackReceiver.Result receive(CallbackUpdate callback);
 
-        record Result(boolean disableButton, Optional<String> alert,
-                      Optional<de.malkusch.telgrambot.Reaction> reaction) {
+        record Result(boolean disableButton, Optional<String> alert, Optional<Reaction> reaction) {
 
             public Result(boolean disableButton) {
                 this(disableButton, Optional.empty(), Optional.empty());
             }
 
-            public Result(boolean disableButton, de.malkusch.telgrambot.Reaction reaction) {
+            public Result(boolean disableButton, Reaction reaction) {
                 this(disableButton, Optional.empty(), Optional.of(reaction));
             }
 
