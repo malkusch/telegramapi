@@ -86,6 +86,10 @@ public interface Handler {
         }
     }
 
+    static Handler onCallback(String command, CallbackHandler handler) {
+        return onCallback(new Command(command), handler);
+    }
+
     static Handler onCallback(Command command, CallbackHandler handler) {
         return (api, update) -> {
             if (!(update instanceof CallbackUpdate callbackUpdate)) {

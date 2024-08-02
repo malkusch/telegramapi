@@ -6,8 +6,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 
 import java.util.concurrent.CountDownLatch;
 
-import static de.malkusch.telgrambot.Handler.onCommand;
-import static de.malkusch.telgrambot.Handler.onText;
+import static de.malkusch.telgrambot.Handler.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ReceiveUpdatesIT {
@@ -19,12 +18,25 @@ public class ReceiveUpdatesIT {
     @Timeout(30)
     public void shouldHandleCommand() throws InterruptedException {
         var expectedText = new ExpectedUpdates("CCCACBCBA");
+        var expectedText2 = new ExpectedUpdates("cccacbcba");
         var expectedCommands = new ExpectedUpdates("ABBA");
+        var expectedReactions = new ExpectedUpdates("");
+        var expectedCallbacks = new ExpectedUpdates("");
+
         telegram.receiveUpdates(
                 onCommand("A", () -> expectedCommands.receive("A")), //
                 onCommand("B", () -> expectedCommands.receive("B")), //
-                onCommand("unexpected", () -> expectedCommands.receive("unexpected")), //
-                onText(text -> expectedText.receive(text.message())) //
+                onCommand("unexpected", () -> expectedCommands.receive("unexpectedCommand")), //
+
+                onReaction(Update.ReactionUpdate.Reaction.THUMBS_UP, update -> expectedReactions.receive("unexpectedReaction")), //
+
+                onCallback("A", callback -> {
+                    expectedCallbacks.receive("unexpectedReaction");
+                    return new CallbackHandler.Result(false);
+                }), //
+
+                onText(text -> expectedText.receive(text.message())), //
+                onText(text -> expectedText2.receive(text.message().toLowerCase())) //
         );
         Thread.sleep(200);
 
@@ -39,7 +51,10 @@ public class ReceiveUpdatesIT {
         telegram.send("A");
 
         expectedText.assertUpdatesReceived();
+        expectedText2.assertUpdatesReceived();
         expectedCommands.assertUpdatesReceived();
+        expectedReactions.assertUpdatesReceived();
+        expectedCallbacks.assertUpdatesReceived();
     }
 
     private static class ExpectedUpdates {
