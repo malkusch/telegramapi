@@ -1,6 +1,9 @@
-package de.malkusch.telgrambot;
+package de.malkusch.telgrambot.api;
 
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import com.pengrad.telegrambot.ExceptionHandler;
+import com.pengrad.telegrambot.UpdatesListener;
+import lombok.extern.slf4j.Slf4j;
+import okhttp3.Interceptor;
 
 import java.io.IOException;
 import java.time.Duration;
@@ -9,22 +12,18 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import com.pengrad.telegrambot.ExceptionHandler;
-import com.pengrad.telegrambot.UpdatesListener;
-
-import lombok.extern.slf4j.Slf4j;
-import okhttp3.Interceptor;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 @Slf4j
 final class ConnectionMonitoring implements AutoCloseable {
 
-    private final TelegramApi api;
+    private final Timeouts timeouts;
     private volatile Instant lastActivity = Instant.now();
     private volatile boolean connected = true;
     private final ScheduledExecutorService executor;
 
-    public ConnectionMonitoring(TelegramApi api) {
-        this.api = api;
+    public ConnectionMonitoring(Timeouts timeouts) {
+        this.timeouts = timeouts;
 
         this.executor = Executors.newSingleThreadScheduledExecutor(r -> {
             var t = new Thread(r, "telegram-monitor");
@@ -44,14 +43,14 @@ final class ConnectionMonitoring implements AutoCloseable {
             started = true;
         }
         log.info("start monitoring telegram connection");
-        var interval = api.timeouts.monitoring().toMillis();
+        var interval = timeouts.monitoring().toMillis();
         executor.scheduleAtFixedRate(this::checkConnection, interval, interval, TimeUnit.MILLISECONDS);
     }
 
     private void checkConnection() {
         log.debug("check connection");
         var lastActivityDuration = Duration.between(lastActivity, Instant.now());
-        if (lastActivityDuration.compareTo(api.timeouts.monitoring()) > 0) {
+        if (lastActivityDuration.compareTo(timeouts.monitoring()) > 0) {
             disconnected();
         }
     }
@@ -116,7 +115,7 @@ final class ConnectionMonitoring implements AutoCloseable {
         }
 
         executor.shutdown();
-        var timeout = api.timeouts.monitoring().toMillis();
+        var timeout = timeouts.monitoring().toMillis();
         if (executor.awaitTermination(timeout, MILLISECONDS)) {
             return;
         }

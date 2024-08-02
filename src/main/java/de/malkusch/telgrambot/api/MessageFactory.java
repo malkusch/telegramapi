@@ -1,4 +1,4 @@
-package de.malkusch.telgrambot;
+package de.malkusch.telgrambot.api;
 
 import static de.malkusch.telgrambot.Message.ReactionMessage.Reaction.IGNORED;
 import static de.malkusch.telgrambot.Message.ReactionMessage.Reaction.THUMBS_UP;
@@ -8,12 +8,14 @@ import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.model.reaction.ReactionType;
 import com.pengrad.telegrambot.model.reaction.ReactionTypeEmoji;
 
+import de.malkusch.telgrambot.Message;
 import de.malkusch.telgrambot.Message.CallbackMessage;
 import de.malkusch.telgrambot.Message.CallbackMessage.Callback;
 import de.malkusch.telgrambot.Message.ReactionMessage;
 import de.malkusch.telgrambot.Message.ReactionMessage.Reaction;
 import de.malkusch.telgrambot.Message.TextMessage;
 import de.malkusch.telgrambot.Message.UnknownMessage;
+import de.malkusch.telgrambot.MessageId;
 
 final class MessageFactory {
 

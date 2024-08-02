@@ -20,26 +20,22 @@ public class DispatcherIT {
     @Timeout(30)
     public void shouldHandleCommand() throws InterruptedException {
         var expectation = new ExpectingHandler("ABBA");
-        telegram.api.startDispatcher(
+        telegram.startDispatcher(
                 expectation.textHandlers("A", "B", "unexpected")
         );
         Thread.sleep(200);
 
-        send("unmapped");
-        send("unmapped");
-        send("unmapped");
-        send("A");
-        send("unmapped");
-        send("B");
-        send("unmapped");
-        send("B");
-        send("A");
+        telegram.send("unmapped");
+        telegram.send("unmapped");
+        telegram.send("unmapped");
+        telegram.send("A");
+        telegram.send("unmapped");
+        telegram.send("B");
+        telegram.send("unmapped");
+        telegram.send("B");
+        telegram.send("A");
 
         expectation.assertExpected();
-    }
-
-    private void send(String command) {
-        telegram.send(api -> api.send(command));
     }
 
     private static class ExpectingHandler {

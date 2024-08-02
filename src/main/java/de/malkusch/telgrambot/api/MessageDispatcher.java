@@ -1,17 +1,18 @@
-package de.malkusch.telgrambot;
-
-import static de.malkusch.telgrambot.MessageFactory.message;
-
-import java.util.Collection;
-import java.util.List;
+package de.malkusch.telgrambot.api;
 
 import com.pengrad.telegrambot.ExceptionHandler;
 import com.pengrad.telegrambot.TelegramException;
 import com.pengrad.telegrambot.UpdatesListener;
 import com.pengrad.telegrambot.model.Update;
-
+import de.malkusch.telgrambot.Handler;
+import de.malkusch.telgrambot.TelegramApi;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import java.util.Collection;
+import java.util.List;
+
+import static de.malkusch.telgrambot.api.MessageFactory.message;
 
 @RequiredArgsConstructor
 @Slf4j

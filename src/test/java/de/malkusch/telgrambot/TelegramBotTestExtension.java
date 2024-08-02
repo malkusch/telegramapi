@@ -1,21 +1,27 @@
 package de.malkusch.telgrambot;
 
+import de.malkusch.telgrambot.api.AbstractTelegramApiProxy;
 import org.junit.jupiter.api.extension.*;
 
 import java.time.Duration;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.function.Function;
 
+import static de.malkusch.telgrambot.TelegramApi.telegramApi;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.extension.ConditionEvaluationResult.disabled;
 import static org.junit.jupiter.api.extension.ConditionEvaluationResult.enabled;
 
-public class TelegramBotTestExtension implements BeforeAllCallback, BeforeEachCallback, AfterAllCallback, ExecutionCondition {
+public class TelegramBotTestExtension extends AbstractTelegramApiProxy implements BeforeAllCallback, AfterEachCallback, AfterAllCallback, ExecutionCondition {
 
-    private final String chatId = System.getenv("TELEGRAM_CHAT_ID");
-    private final String token = System.getenv("TELEGRAM_TOKEN");
-    public TelegramApi api;
+    private static final String CHAT_ID = System.getenv("TELEGRAM_CHAT_ID");
+    private static final String TOKEN = System.getenv("TELEGRAM_TOKEN");
+
+    public TelegramBotTestExtension() {
+        super(telegramApi(CHAT_ID, TOKEN, Duration.ofSeconds(10)));
+    }
 
     @Override
     public ConditionEvaluationResult evaluateExecutionCondition(ExtensionContext context) {
@@ -23,7 +29,7 @@ public class TelegramBotTestExtension implements BeforeAllCallback, BeforeEachCa
         if (actor != null && actor.equals("malkusch")) {
             return enabled("GITHUB_TRIGGERING_ACTOR=" + actor);
         }
-        if (token != null) {
+        if (TOKEN != null) {
             return enabled("TELEGRAM_TOKEN given");
         }
         return disabled("GITHUB_TRIGGERING_ACTOR=" + actor);
@@ -31,43 +37,73 @@ public class TelegramBotTestExtension implements BeforeAllCallback, BeforeEachCa
 
     @Override
     public void beforeAll(ExtensionContext context) throws Exception {
-        assertTrue(token != null && chatId != null);
-        assertTrue(!token.isBlank() && !chatId.isBlank());
+        assertTrue(TOKEN != null && CHAT_ID != null);
+        assertTrue(!TOKEN.isBlank() && !CHAT_ID.isBlank());
 
-        api = new TelegramApi(chatId, token, Duration.ofSeconds(10));
+        unpin();
+        dropPendingUpdates();
+    }
+
+    private final Set<MessageId> pinned = new HashSet<>();
+
+    @Override
+    public void pin(MessageId message) {
+        super.pin(message);
+        pinned.add(message);
     }
 
     @Override
-    public void beforeEach(ExtensionContext context) throws Exception {
-        api.unpin();
-        api.dropPendingUpdates();
+    public void unpin() {
+        super.unpin();
+        pinned.clear();
+    }
+
+    @Override
+    public void unpin(MessageId message) {
+        super.unpin(message);
+        pinned.remove(message);
+    }
+
+    @Override
+    public void afterEach(ExtensionContext context) {
+        if (!pinned.isEmpty()) {
+            unpin();
+        }
+        dropPendingUpdates();
     }
 
     private final List<MessageId> messages = new CopyOnWriteArrayList<>();
 
-    public MessageId send(Function<TelegramApi, MessageId> send) {
-        var message = send.apply(api);
+    @Override
+    public MessageId send(String text) {
+        var message = super.send(text);
+        messages.add(message);
+        return message;
+    }
+
+    @Override
+    public MessageId send(String text, Button... buttons) {
+        var message = super.send(text, buttons);
         messages.add(message);
         return message;
     }
 
     @Override
     public void afterAll(ExtensionContext context) throws Exception {
-        try (var closing = api) {
-            api.unpin();
-            api.delete(messages);
+        try (this) {
+            delete(messages);
             messages.clear();
-            api.dropPendingUpdates();
+            dropPendingUpdates();
         }
     }
 
     public PinnedMessage fetchMessage(MessageId messageId) {
-        api.pin(messageId);
+        pin(messageId);
         try {
-            return api.pinned();
+            return pinned();
 
         } finally {
-            api.unpin(messageId);
+            unpin(messageId);
         }
     }
 }

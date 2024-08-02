@@ -12,6 +12,10 @@ import static java.util.Optional.ofNullable;
 
 public sealed interface PinnedMessage {
 
+    NoMessage NO_MESSAGE = new NoMessage();
+    record NoMessage() implements PinnedMessage {
+    }
+
     record TextMessage(MessageId id, String text) implements PinnedMessage {
     }
 
@@ -25,7 +29,7 @@ public sealed interface PinnedMessage {
             this(id, text, stream(buttons).map(Button::new).toList());
         }
 
-        record Button(String name, String callback) {
+        public record Button(String name, String callback) {
 
             Button(TelegramApi.Button button) {
                 this(button.name(), button.callback().toString());
@@ -33,39 +37,4 @@ public sealed interface PinnedMessage {
 
         }
     }
-
-    NoMessage NO_MESSAGE = new NoMessage();
-
-    record NoMessage() implements PinnedMessage {
-    }
-
-    static PinnedMessage pinnedMessage(ChatFullInfo chat) {
-        return ofNullable(chat) //
-                .map(ChatFullInfo::pinnedMessage) //
-
-                .flatMap(pinnedMessage -> {
-                    var id = new MessageId(pinnedMessage.messageId());
-                    // var fromBot = it.viaBot() != null || it.from() != null && it.from().isBot();
-                    var text = ofNullable(pinnedMessage.text());
-
-                    var buttons = ofNullable(pinnedMessage.replyMarkup()) //
-                            .map(InlineKeyboardMarkup::inlineKeyboard).stream() //
-                            .flatMap(Arrays::stream).flatMap(Arrays::stream) //
-                            .flatMap(it -> ofNullable(it.text())
-                                    .flatMap(name -> ofNullable(it.callbackData())
-                                            .map(cb -> new CallbackMessage.Button(name, cb))).stream()) //
-                            .toList();
-
-                    if (buttons.isEmpty()) {
-                        return text.map(it -> new TextMessage(id, it));
-
-                    } else {
-                        return text.map(it -> new CallbackMessage(id, it, buttons));
-                    }
-
-                }) //
-
-                .orElse(NO_MESSAGE);
-    }
-
 }

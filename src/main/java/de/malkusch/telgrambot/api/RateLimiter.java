@@ -1,11 +1,11 @@
-package de.malkusch.telgrambot;
+package de.malkusch.telgrambot.api;
 
 import io.github.resilience4j.ratelimiter.RateLimiterConfig;
 import io.github.resilience4j.ratelimiter.RateLimiterRegistry;
 
 import java.time.Duration;
 
-public class RateLimiter implements AutoCloseable {
+final class RateLimiter implements AutoCloseable {
 
     private final io.github.resilience4j.ratelimiter.RateLimiter limiter;
 
