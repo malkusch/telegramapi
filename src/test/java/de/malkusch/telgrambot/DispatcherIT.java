@@ -1,5 +1,6 @@
 package de.malkusch.telgrambot;
 
+import de.malkusch.telgrambot.Message.TextMessage;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -20,10 +21,10 @@ public class DispatcherIT {
     public void shouldHandleCommand() throws InterruptedException {
         var expectation = new ExpectingHandler("ABBA", "CCCACBCBA");
         telegram.startDispatcher(
-                expectation.commandHandler("A"), //
-                expectation.commandHandler("B"), //
-                expectation.commandHandler("unexpected"), //
-                expectation.textHandler() //
+                onCommand("A", () -> expectation.registerCommand("A")), //
+                onCommand("B", () -> expectation.registerCommand("B")), //
+                onCommand("unexpected", () -> expectation.registerCommand("unexpected")), //
+                onText(expectation::registerText) //
         );
         Thread.sleep(200);
 
@@ -60,19 +61,14 @@ public class DispatcherIT {
             assertEquals(expectedText, handledText.toString());
         }
 
-        public Handler commandHandler(String command) {
-            return onCommand(command, () -> {
-                handledCommands.append(command);
-                semaphore.countDown();
-            });
-
+        public void registerCommand(String command) {
+            handledCommands.append(command);
+            semaphore.countDown();
         }
 
-        public Handler textHandler() {
-            return onText((text) -> {
-                handledText.append(text.message());
-                semaphore.countDown();
-            });
+        public void registerText(TextMessage text) {
+            handledText.append(text.message());
+            semaphore.countDown();
         }
     }
 }
