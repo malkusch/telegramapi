@@ -42,7 +42,7 @@ final class ConnectionMonitoring implements AutoCloseable {
             }
             started = true;
         }
-        log.info("start monitoring telegram connection");
+        log.info("start monitoring of the telegram connection");
         var interval = timeouts.monitoring().toMillis();
         executor.scheduleAtFixedRate(this::checkConnection, interval, interval, TimeUnit.MILLISECONDS);
     }
@@ -113,6 +113,7 @@ final class ConnectionMonitoring implements AutoCloseable {
                 return;
             }
         }
+        log.info("stopping monitoring of the telegram connection");
 
         executor.shutdown();
         var timeout = timeouts.monitoring().toMillis();
