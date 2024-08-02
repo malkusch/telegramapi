@@ -3,6 +3,7 @@ package de.malkusch.telgrambot.api;
 import de.malkusch.telgrambot.MessageId;
 import de.malkusch.telgrambot.PinnedMessage;
 import de.malkusch.telgrambot.TelegramApi;
+import de.malkusch.telgrambot.UpdateReceiver;
 
 import java.time.Duration;
 import java.util.function.Function;
@@ -19,6 +20,11 @@ final class TelegramRateLimitedApi extends AbstractTelegramApiProxy {
         groupLimit = new RateLimiter(Duration.ofMinutes(1), 19, timeouts.groupThrottle(), "group");
         messageLimit = new RateLimiter(Duration.ofSeconds(1), 29, timeouts.messageThrottle(), "message");
         pinLimit = new RateLimiter(Duration.ofSeconds(1), 2, timeouts.pinThrottle(), "pin");
+    }
+
+    @Override
+    public void receiveUpdates(UpdateReceiver... receivers) {
+        api.receiveUpdates(receivers);
     }
 
     @Override

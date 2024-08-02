@@ -7,16 +7,16 @@ import de.malkusch.telgrambot.Update.TextMessage;
 
 import java.util.Optional;
 
-public interface Handler {
+public interface UpdateReceiver {
 
-    void handle(TelegramApi api, Update update);
+    void receive(TelegramApi api, Update update);
 
     @FunctionalInterface
-    interface TextHandler {
-        void handle(TextMessage message);
+    interface TextReceiver {
+        void receive(TextMessage message);
     }
 
-    static Handler onText(TextHandler handler) {
+    static UpdateReceiver onText(TextReceiver receiver) {
         return (api, update) -> {
             if (!(update instanceof TextMessage text)) {
                 return;
@@ -24,33 +24,33 @@ public interface Handler {
             if (text.fromBot()) {
                 return;
             }
-            handler.handle(text);
+            receiver.receive(text);
         };
     }
 
     @FunctionalInterface
-    interface CommandHandler {
-        void handle();
+    interface CommandReceiver {
+        void receive();
     }
 
-    static Handler onCommand(String command, CommandHandler handler) {
-        return onCommand(new Command(command), handler);
+    static UpdateReceiver onCommand(String command, CommandReceiver receiver) {
+        return onCommand(new Command(command), receiver);
     }
 
-    static Handler onCommand(Command command, CommandHandler handler) {
+    static UpdateReceiver onCommand(Command command, CommandReceiver receiver) {
         return onText(text -> {
             if (text.message().equalsIgnoreCase(command.name())) {
-                handler.handle();
+                receiver.receive();
             }
         });
     }
 
     @FunctionalInterface
-    interface ReactionHandler {
-        void handle(ReactionUpdate update);
+    interface ReactionReceiver {
+        void receive(ReactionUpdate update);
     }
 
-    static Handler onReaction(Reaction reaction, ReactionHandler handler) {
+    static UpdateReceiver onReaction(Reaction reaction, ReactionReceiver receiver) {
         return (api, update) -> {
             if (!(update instanceof ReactionUpdate reactionUpdate)) {
                 return;
@@ -61,13 +61,13 @@ public interface Handler {
             if (!reactionUpdate.contains(reaction)) {
                 return;
             }
-            handler.handle(reactionUpdate);
+            receiver.receive(reactionUpdate);
         };
     }
 
     @FunctionalInterface
-    interface CallbackHandler {
-        CallbackHandler.Result handle(CallbackUpdate callback);
+    interface CallbackReceiver {
+        CallbackReceiver.Result receive(CallbackUpdate callback);
 
         record Result(boolean disableButton, Optional<String> alert,
                       Optional<de.malkusch.telgrambot.TelegramApi.Reaction> reaction) {
@@ -86,11 +86,11 @@ public interface Handler {
         }
     }
 
-    static Handler onCallback(String command, CallbackHandler handler) {
-        return onCallback(new Command(command), handler);
+    static UpdateReceiver onCallback(String command, CallbackReceiver receiver) {
+        return onCallback(new Command(command), receiver);
     }
 
-    static Handler onCallback(Command command, CallbackHandler handler) {
+    static UpdateReceiver onCallback(Command command, CallbackReceiver receiver) {
         return (api, update) -> {
             if (!(update instanceof CallbackUpdate callbackUpdate)) {
                 return;
@@ -98,7 +98,7 @@ public interface Handler {
             if (!callbackUpdate.callback().command().equals(command)) {
                 return;
             }
-            var result = handler.handle(callbackUpdate);
+            var result = receiver.receive(callbackUpdate);
 
             result.alert.ifPresentOrElse( //
                     alert -> api.answer(callbackUpdate.callbackId(), alert), //

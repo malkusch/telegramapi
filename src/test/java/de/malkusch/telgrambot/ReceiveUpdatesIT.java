@@ -1,12 +1,14 @@
 package de.malkusch.telgrambot;
 
+import de.malkusch.telgrambot.UpdateReceiver.CallbackReceiver.Result;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import java.util.concurrent.CountDownLatch;
 
-import static de.malkusch.telgrambot.Handler.*;
+import static de.malkusch.telgrambot.Update.ReactionUpdate.Reaction.THUMBS_UP;
+import static de.malkusch.telgrambot.UpdateReceiver.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ReceiveUpdatesIT {
@@ -28,11 +30,11 @@ public class ReceiveUpdatesIT {
                 onCommand("B", () -> expectedCommands.receive("B")), //
                 onCommand("unexpected", () -> expectedCommands.receive("unexpectedCommand")), //
 
-                onReaction(Update.ReactionUpdate.Reaction.THUMBS_UP, update -> expectedReactions.receive("unexpectedReaction")), //
+                onReaction(THUMBS_UP, update -> expectedReactions.receive("unexpectedReaction")), //
 
                 onCallback("A", callback -> {
-                    expectedCallbacks.receive("unexpectedReaction");
-                    return new CallbackHandler.Result(false);
+                    expectedCallbacks.receive("unexpectedCallback");
+                    return new Result(false);
                 }), //
 
                 onText(text -> expectedText.receive(text.message())), //

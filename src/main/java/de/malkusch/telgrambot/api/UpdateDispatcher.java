@@ -4,7 +4,7 @@ import com.pengrad.telegrambot.ExceptionHandler;
 import com.pengrad.telegrambot.TelegramException;
 import com.pengrad.telegrambot.UpdatesListener;
 import com.pengrad.telegrambot.model.Update;
-import de.malkusch.telgrambot.Handler;
+import de.malkusch.telgrambot.UpdateReceiver;
 import de.malkusch.telgrambot.TelegramApi;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,7 +17,7 @@ import static de.malkusch.telgrambot.api.UpdateFactory.update;
 @Slf4j
 final class UpdateDispatcher implements ExceptionHandler, UpdatesListener {
 
-    private final Handler[] handlers;
+    private final UpdateReceiver[] receivers;
     private final TelegramApi api;
 
     @Override
@@ -32,9 +32,9 @@ final class UpdateDispatcher implements ExceptionHandler, UpdatesListener {
     private int dispatch(Update apiUpdate) {
         var id = apiUpdate.updateId();
         var update = update(apiUpdate);
-        for (var handler : handlers) {
+        for (var handler : receivers) {
             try {
-                handler.handle(api, update);
+                handler.receive(api, update);
 
             } catch (Exception e) {
                 log.warn("Couldn't handle update {}", update, e);

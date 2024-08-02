@@ -13,7 +13,7 @@ public interface TelegramApi extends AutoCloseable {
         return TelegramApiFactory.telegramApi(chatId, token, timeout);
     }
 
-    void receiveUpdates(Handler... handlers);
+    void receiveUpdates(UpdateReceiver... receivers);
 
     record Button(String name, Callback callback) {
         public Button(String name, Command command) {

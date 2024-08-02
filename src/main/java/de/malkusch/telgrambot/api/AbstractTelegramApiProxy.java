@@ -1,6 +1,6 @@
 package de.malkusch.telgrambot.api;
 
-import de.malkusch.telgrambot.Handler;
+import de.malkusch.telgrambot.UpdateReceiver;
 import de.malkusch.telgrambot.Update.CallbackUpdate.CallbackId;
 import de.malkusch.telgrambot.MessageId;
 import de.malkusch.telgrambot.PinnedMessage;
@@ -14,7 +14,7 @@ import java.util.function.Function;
 @RequiredArgsConstructor
 public abstract class AbstractTelegramApiProxy implements TelegramApi {
 
-    private final TelegramApi api;
+    protected final TelegramApi api;
 
     protected <R> R delegate(Function<TelegramApi, R> call) {
         return call.apply(api);
@@ -28,8 +28,8 @@ public abstract class AbstractTelegramApiProxy implements TelegramApi {
     }
 
     @Override
-    public void receiveUpdates(Handler... handlers) {
-        delegateVoid(api -> api.receiveUpdates(handlers));
+    public void receiveUpdates(UpdateReceiver... receivers) {
+        delegateVoid(api -> api.receiveUpdates(receivers));
     }
 
     @Override

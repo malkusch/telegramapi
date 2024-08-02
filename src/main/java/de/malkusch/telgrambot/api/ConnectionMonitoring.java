@@ -113,7 +113,7 @@ final class ConnectionMonitoring implements AutoCloseable {
                 return;
             }
         }
-        log.info("stopping monitoring of the telegram connection");
+        log.info("stop monitoring of the telegram connection");
 
         executor.shutdown();
         var timeout = timeouts.monitoring().toMillis();

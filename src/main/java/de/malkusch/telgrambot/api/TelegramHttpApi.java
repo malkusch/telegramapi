@@ -6,7 +6,7 @@ import com.pengrad.telegrambot.model.request.InlineKeyboardButton;
 import com.pengrad.telegrambot.model.request.InlineKeyboardMarkup;
 import com.pengrad.telegrambot.request.*;
 import com.pengrad.telegrambot.response.BaseResponse;
-import de.malkusch.telgrambot.Handler;
+import de.malkusch.telgrambot.UpdateReceiver;
 import de.malkusch.telgrambot.MessageId;
 import de.malkusch.telgrambot.PinnedMessage;
 import de.malkusch.telgrambot.TelegramApi;
@@ -50,8 +50,8 @@ final class TelegramHttpApi implements TelegramApi {
                 .build();
     }
 
-    public void receiveUpdates(Handler... handlers) {
-        var dispatcher = new UpdateDispatcher(handlers, this);
+    public void receiveUpdates(UpdateReceiver... receivers) {
+        var dispatcher = new UpdateDispatcher(receivers, this);
 
         var request = new GetUpdates() //
                 .timeout((int) timeouts.polling().toSeconds())
