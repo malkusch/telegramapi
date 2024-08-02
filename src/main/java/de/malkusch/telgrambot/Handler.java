@@ -7,41 +7,51 @@ import de.malkusch.telgrambot.Message.TextMessage;
 
 import java.util.Optional;
 
-public sealed interface Handler {
+public interface Handler {
 
     void handle(TelegramApi api, Message message);
 
-    record TextHandler(Command command, Handling handler) implements Handler {
+    @FunctionalInterface
+    interface TextHandler {
+        void handle(TextMessage message);
+    }
 
-        @FunctionalInterface
-        public interface Handling {
-            void handle(TelegramApi api);
-        }
-
-        @Override
-        public void handle(TelegramApi api, Message message) {
+    static Handler onText(TextHandler handler) {
+        return (api, message) -> {
             if (!(message instanceof TextMessage text)) {
                 return;
             }
             if (text.fromBot()) {
                 return;
             }
-            if (!text.message().equalsIgnoreCase(command.name())) {
-                return;
-            }
-            handler.handle(api);
-        }
+            handler.handle(text);
+        };
     }
 
-    record ReactionHandler(Reaction reaction, Handling handler) implements Handler {
+    @FunctionalInterface
+    interface CommandHandler {
+        void handle();
+    }
 
-        @FunctionalInterface
-        public interface Handling {
-            void handle(TelegramApi api, ReactionMessage message);
-        }
+    static Handler onCommand(String command, CommandHandler handler) {
+        return onCommand(new Command(command), handler);
+    }
 
-        @Override
-        public void handle(TelegramApi api, Message message) {
+    static Handler onCommand(Command command, CommandHandler handler) {
+        return onText(text -> {
+            if (text.message().equalsIgnoreCase(command.name())) {
+                handler.handle();
+            }
+        });
+    }
+
+    @FunctionalInterface
+    interface ReactionHandler {
+        void handle(ReactionMessage message);
+    }
+
+    static Handler onReaction(Reaction reaction, ReactionHandler handler) {
+        return (api, message) -> {
             if (!(message instanceof ReactionMessage reactionMessage)) {
                 return;
             }
@@ -51,14 +61,16 @@ public sealed interface Handler {
             if (!reactionMessage.contains(reaction)) {
                 return;
             }
-            handler.handle(api, reactionMessage);
-        }
+            handler.handle(reactionMessage);
+        };
     }
 
-    record CallbackHandler(Command command, Handling handler) implements Handler {
+    @FunctionalInterface
+    interface CallbackHandler {
+        CallbackHandler.Result handle(CallbackMessage message);
 
-        public record Result(boolean disableButton, Optional<String> alert,
-                             Optional<de.malkusch.telgrambot.TelegramApi.Reaction> reaction) {
+        record Result(boolean disableButton, Optional<String> alert,
+                      Optional<de.malkusch.telgrambot.TelegramApi.Reaction> reaction) {
 
             public Result(boolean disableButton) {
                 this(disableButton, Optional.empty(), Optional.empty());
@@ -72,32 +84,28 @@ public sealed interface Handler {
                 this(disableButton, Optional.of(alert), Optional.empty());
             }
         }
+    }
 
-        @FunctionalInterface
-        public interface Handling {
-            Result handle(TelegramApi api, CallbackMessage message);
-        }
-
-        @Override
-        public void handle(TelegramApi api, Message message) {
-            if (!(message instanceof CallbackMessage cm)) {
+    static Handler onCallback(Command command, CallbackHandler handler) {
+        return (api, message) -> {
+            if (!(message instanceof CallbackMessage callbackMessage)) {
                 return;
             }
-            if (!cm.callback().command().equals(command)) {
+            if (!callbackMessage.callback().command().equals(command)) {
                 return;
             }
-            var result = handler.handle(api, cm);
+            var result = handler.handle(callbackMessage);
 
             result.alert.ifPresentOrElse( //
-                    alert -> api.answer(cm.callbackId(), alert), //
-                    () -> api.answer(cm.callbackId()));
+                    alert -> api.answer(callbackMessage.callbackId(), alert), //
+                    () -> api.answer(callbackMessage.callbackId()));
 
             if (result.disableButton) {
-                api.disableButton(cm.id());
+                api.disableButton(callbackMessage.id());
             }
 
             result.reaction.ifPresent( //
-                    reaction -> api.react(cm.id(), reaction));
-        }
+                    reaction -> api.react(callbackMessage.id(), reaction));
+        };
     }
 }

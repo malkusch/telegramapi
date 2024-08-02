@@ -1,14 +1,13 @@
 package de.malkusch.telgrambot;
 
-import de.malkusch.telgrambot.Handler.TextHandler;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-import java.util.Collection;
 import java.util.concurrent.CountDownLatch;
 
-import static java.util.Arrays.stream;
+import static de.malkusch.telgrambot.Handler.onCommand;
+import static de.malkusch.telgrambot.Handler.onText;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class DispatcherIT {
@@ -19,19 +18,22 @@ public class DispatcherIT {
     @Test
     @Timeout(30)
     public void shouldHandleCommand() throws InterruptedException {
-        var expectation = new ExpectingHandler("ABBA");
+        var expectation = new ExpectingHandler("ABBA", "CCCACBCBA");
         telegram.startDispatcher(
-                expectation.textHandlers("A", "B", "unexpected")
+                expectation.commandHandler("A"), //
+                expectation.commandHandler("B"), //
+                expectation.commandHandler("unexpected"), //
+                expectation.textHandler() //
         );
         Thread.sleep(200);
 
-        telegram.send("unmapped");
-        telegram.send("unmapped");
-        telegram.send("unmapped");
+        telegram.send("C");
+        telegram.send("C");
+        telegram.send("C");
         telegram.send("A");
-        telegram.send("unmapped");
+        telegram.send("C");
         telegram.send("B");
-        telegram.send("unmapped");
+        telegram.send("C");
         telegram.send("B");
         telegram.send("A");
 
@@ -40,29 +42,37 @@ public class DispatcherIT {
 
     private static class ExpectingHandler {
 
-        public ExpectingHandler(String expectation) {
-            this.expectation = expectation;
-            semaphore = new CountDownLatch(expectation.length());
+        public ExpectingHandler(String expectedCommands, String expectedText) {
+            this.expectedCommands = expectedCommands;
+            this.expectedText = expectedText;
+            semaphore = new CountDownLatch(expectedCommands.length() + expectedText.length());
         }
 
         private final CountDownLatch semaphore;
-        private final String expectation;
-        private final StringBuffer commands = new StringBuffer();
+        private final String expectedCommands;
+        private final String expectedText;
+        private final StringBuffer handledCommands = new StringBuffer();
+        private final StringBuffer handledText = new StringBuffer();
 
         public void assertExpected() throws InterruptedException {
             semaphore.await();
-            assertEquals(expectation, commands.toString());
+            assertEquals(expectedCommands, handledCommands.toString());
+            assertEquals(expectedText, handledText.toString());
         }
 
-        public Handler textHandler(String command) {
-            return new TextHandler(new Command(command), it -> {
-                commands.append(command);
+        public Handler commandHandler(String command) {
+            return onCommand(command, () -> {
+                handledCommands.append(command);
                 semaphore.countDown();
             });
+
         }
 
-        public Collection<Handler> textHandlers(String... commands) {
-            return stream(commands).map(this::textHandler).toList();
+        public Handler textHandler() {
+            return onText((text) -> {
+                handledText.append(text.message());
+                semaphore.countDown();
+            });
         }
     }
 }
