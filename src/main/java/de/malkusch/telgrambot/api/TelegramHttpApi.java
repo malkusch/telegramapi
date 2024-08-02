@@ -7,10 +7,10 @@ import com.pengrad.telegrambot.model.request.InlineKeyboardMarkup;
 import com.pengrad.telegrambot.request.*;
 import com.pengrad.telegrambot.response.BaseResponse;
 import de.malkusch.telgrambot.Handler;
-import de.malkusch.telgrambot.Message.CallbackMessage.CallbackId;
 import de.malkusch.telgrambot.MessageId;
 import de.malkusch.telgrambot.PinnedMessage;
 import de.malkusch.telgrambot.TelegramApi;
+import de.malkusch.telgrambot.Update.CallbackUpdate.CallbackId;
 import okhttp3.OkHttpClient;
 
 import java.util.Arrays;
@@ -50,8 +50,8 @@ final class TelegramHttpApi implements TelegramApi {
                 .build();
     }
 
-    public void startDispatcher(Collection<Handler> handlers) {
-        var dispatcher = new MessageDispatcher(handlers, this);
+    public void receiveUpdates(Handler... handlers) {
+        var dispatcher = new UpdateDispatcher(handlers, this);
 
         var request = new GetUpdates() //
                 .timeout((int) timeouts.polling().toSeconds())

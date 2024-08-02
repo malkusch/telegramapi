@@ -1,7 +1,7 @@
 package de.malkusch.telgrambot.api;
 
 import de.malkusch.telgrambot.Handler;
-import de.malkusch.telgrambot.Message.CallbackMessage.CallbackId;
+import de.malkusch.telgrambot.Update.CallbackUpdate.CallbackId;
 import de.malkusch.telgrambot.MessageId;
 import de.malkusch.telgrambot.PinnedMessage;
 import de.malkusch.telgrambot.TelegramApi;
@@ -28,13 +28,8 @@ public abstract class AbstractTelegramApiProxy implements TelegramApi {
     }
 
     @Override
-    public void startDispatcher(Handler... handlers) {
-        delegateVoid(api -> api.startDispatcher(handlers));
-    }
-
-    @Override
-    public void startDispatcher(Collection<Handler> handlers) {
-        delegateVoid(api -> api.startDispatcher(handlers));
+    public void receiveUpdates(Handler... handlers) {
+        delegateVoid(api -> api.receiveUpdates(handlers));
     }
 
     @Override

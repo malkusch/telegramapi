@@ -2,12 +2,12 @@ package de.malkusch.telgrambot;
 
 import java.util.List;
 
-public sealed interface Message {
+public sealed interface Update {
 
-    record TextMessage(MessageId id, String message, boolean fromBot) implements Message {
+    record TextMessage(MessageId id, String message, boolean fromBot) implements Update {
     }
 
-    record ReactionMessage(MessageId id, List<Reaction> reactions, boolean fromBot) implements Message {
+    record ReactionUpdate(MessageId id, List<Reaction> reactions, boolean fromBot) implements Update {
 
         public boolean contains(Reaction reaction) {
             return reactions.contains(reaction);
@@ -18,7 +18,7 @@ public sealed interface Message {
         }
     }
 
-    record CallbackMessage(MessageId id, CallbackId callbackId, Callback callback) implements Message {
+    record CallbackUpdate(MessageId id, CallbackId callbackId, Callback callback) implements Update {
 
         public record CallbackId(String id) {
         }
@@ -43,6 +43,6 @@ public sealed interface Message {
         }
     }
 
-    record UnknownMessage() implements Message {
+    record UnknownUpdate() implements Update {
     }
 }

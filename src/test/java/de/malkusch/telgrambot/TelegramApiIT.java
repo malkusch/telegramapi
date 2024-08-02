@@ -1,6 +1,6 @@
 package de.malkusch.telgrambot;
 
-import de.malkusch.telgrambot.Message.CallbackMessage.Callback;
+import de.malkusch.telgrambot.Update.CallbackUpdate.Callback;
 import de.malkusch.telgrambot.PinnedMessage.CallbackMessage;
 import de.malkusch.telgrambot.PinnedMessage.TextMessage;
 import de.malkusch.telgrambot.TelegramApi.Button;

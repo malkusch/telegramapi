@@ -9,16 +9,15 @@ import de.malkusch.telgrambot.TelegramApi;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.Collection;
 import java.util.List;
 
-import static de.malkusch.telgrambot.api.MessageFactory.message;
+import static de.malkusch.telgrambot.api.UpdateFactory.update;
 
 @RequiredArgsConstructor
 @Slf4j
-final class MessageDispatcher implements ExceptionHandler, UpdatesListener {
+final class UpdateDispatcher implements ExceptionHandler, UpdatesListener {
 
-    private final Collection<Handler> handlers;
+    private final Handler[] handlers;
     private final TelegramApi api;
 
     @Override
@@ -30,15 +29,15 @@ final class MessageDispatcher implements ExceptionHandler, UpdatesListener {
                 .orElse(CONFIRMED_UPDATES_ALL);
     }
 
-    private int dispatch(Update update) {
-        var id = update.updateId();
-        var message = message(update);
+    private int dispatch(Update apiUpdate) {
+        var id = apiUpdate.updateId();
+        var update = update(apiUpdate);
         for (var handler : handlers) {
             try {
-                handler.handle(api, message);
+                handler.handle(api, update);
 
             } catch (Exception e) {
-                log.warn("Couldn't handle message {}", message, e);
+                log.warn("Couldn't handle update {}", update, e);
             }
         }
         return id;

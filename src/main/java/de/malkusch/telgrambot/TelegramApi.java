@@ -1,13 +1,11 @@
 package de.malkusch.telgrambot;
 
-import de.malkusch.telgrambot.Message.CallbackMessage.Callback;
-import de.malkusch.telgrambot.Message.CallbackMessage.CallbackId;
+import de.malkusch.telgrambot.Update.CallbackUpdate.Callback;
+import de.malkusch.telgrambot.Update.CallbackUpdate.CallbackId;
 import de.malkusch.telgrambot.api.TelegramApiFactory;
 
 import java.time.Duration;
 import java.util.Collection;
-
-import static java.util.Arrays.asList;
 
 public interface TelegramApi extends AutoCloseable {
 
@@ -15,11 +13,7 @@ public interface TelegramApi extends AutoCloseable {
         return TelegramApiFactory.telegramApi(chatId, token, timeout);
     }
 
-    default void startDispatcher(Handler... handlers) {
-        startDispatcher(asList(handlers));
-    }
-
-    void startDispatcher(Collection<Handler> handlers);
+    void receiveUpdates(Handler... handlers);
 
     record Button(String name, Callback callback) {
         public Button(String name, Command command) {

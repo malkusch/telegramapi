@@ -1,15 +1,15 @@
 package de.malkusch.telgrambot;
 
-import de.malkusch.telgrambot.Message.CallbackMessage;
-import de.malkusch.telgrambot.Message.ReactionMessage;
-import de.malkusch.telgrambot.Message.ReactionMessage.Reaction;
-import de.malkusch.telgrambot.Message.TextMessage;
+import de.malkusch.telgrambot.Update.CallbackUpdate;
+import de.malkusch.telgrambot.Update.ReactionUpdate;
+import de.malkusch.telgrambot.Update.ReactionUpdate.Reaction;
+import de.malkusch.telgrambot.Update.TextMessage;
 
 import java.util.Optional;
 
 public interface Handler {
 
-    void handle(TelegramApi api, Message message);
+    void handle(TelegramApi api, Update update);
 
     @FunctionalInterface
     interface TextHandler {
@@ -17,8 +17,8 @@ public interface Handler {
     }
 
     static Handler onText(TextHandler handler) {
-        return (api, message) -> {
-            if (!(message instanceof TextMessage text)) {
+        return (api, update) -> {
+            if (!(update instanceof TextMessage text)) {
                 return;
             }
             if (text.fromBot()) {
@@ -47,27 +47,27 @@ public interface Handler {
 
     @FunctionalInterface
     interface ReactionHandler {
-        void handle(ReactionMessage message);
+        void handle(ReactionUpdate update);
     }
 
     static Handler onReaction(Reaction reaction, ReactionHandler handler) {
-        return (api, message) -> {
-            if (!(message instanceof ReactionMessage reactionMessage)) {
+        return (api, update) -> {
+            if (!(update instanceof ReactionUpdate reactionUpdate)) {
                 return;
             }
-            if (reactionMessage.fromBot()) {
+            if (reactionUpdate.fromBot()) {
                 return;
             }
-            if (!reactionMessage.contains(reaction)) {
+            if (!reactionUpdate.contains(reaction)) {
                 return;
             }
-            handler.handle(reactionMessage);
+            handler.handle(reactionUpdate);
         };
     }
 
     @FunctionalInterface
     interface CallbackHandler {
-        CallbackHandler.Result handle(CallbackMessage message);
+        CallbackHandler.Result handle(CallbackUpdate callback);
 
         record Result(boolean disableButton, Optional<String> alert,
                       Optional<de.malkusch.telgrambot.TelegramApi.Reaction> reaction) {
@@ -87,25 +87,25 @@ public interface Handler {
     }
 
     static Handler onCallback(Command command, CallbackHandler handler) {
-        return (api, message) -> {
-            if (!(message instanceof CallbackMessage callbackMessage)) {
+        return (api, update) -> {
+            if (!(update instanceof CallbackUpdate callbackUpdate)) {
                 return;
             }
-            if (!callbackMessage.callback().command().equals(command)) {
+            if (!callbackUpdate.callback().command().equals(command)) {
                 return;
             }
-            var result = handler.handle(callbackMessage);
+            var result = handler.handle(callbackUpdate);
 
             result.alert.ifPresentOrElse( //
-                    alert -> api.answer(callbackMessage.callbackId(), alert), //
-                    () -> api.answer(callbackMessage.callbackId()));
+                    alert -> api.answer(callbackUpdate.callbackId(), alert), //
+                    () -> api.answer(callbackUpdate.callbackId()));
 
             if (result.disableButton) {
-                api.disableButton(callbackMessage.id());
+                api.disableButton(callbackUpdate.id());
             }
 
             result.reaction.ifPresent( //
-                    reaction -> api.react(callbackMessage.id(), reaction));
+                    reaction -> api.react(callbackUpdate.id(), reaction));
         };
     }
 }
