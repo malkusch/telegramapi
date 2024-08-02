@@ -6,10 +6,7 @@ import com.pengrad.telegrambot.model.request.InlineKeyboardButton;
 import com.pengrad.telegrambot.model.request.InlineKeyboardMarkup;
 import com.pengrad.telegrambot.request.*;
 import com.pengrad.telegrambot.response.BaseResponse;
-import de.malkusch.telgrambot.UpdateReceiver;
-import de.malkusch.telgrambot.MessageId;
-import de.malkusch.telgrambot.PinnedMessage;
-import de.malkusch.telgrambot.TelegramApi;
+import de.malkusch.telgrambot.*;
 import de.malkusch.telgrambot.Update.CallbackUpdate.CallbackId;
 import okhttp3.OkHttpClient;
 

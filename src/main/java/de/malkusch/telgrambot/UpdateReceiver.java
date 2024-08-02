@@ -2,7 +2,6 @@ package de.malkusch.telgrambot;
 
 import de.malkusch.telgrambot.Update.CallbackUpdate;
 import de.malkusch.telgrambot.Update.ReactionUpdate;
-import de.malkusch.telgrambot.Update.ReactionUpdate.Reaction;
 import de.malkusch.telgrambot.Update.TextMessage;
 
 import java.util.Optional;
@@ -70,13 +69,13 @@ public interface UpdateReceiver {
         CallbackReceiver.Result receive(CallbackUpdate callback);
 
         record Result(boolean disableButton, Optional<String> alert,
-                      Optional<de.malkusch.telgrambot.TelegramApi.Reaction> reaction) {
+                      Optional<de.malkusch.telgrambot.Reaction> reaction) {
 
             public Result(boolean disableButton) {
                 this(disableButton, Optional.empty(), Optional.empty());
             }
 
-            public Result(boolean disableButton, de.malkusch.telgrambot.TelegramApi.Reaction reaction) {
+            public Result(boolean disableButton, de.malkusch.telgrambot.Reaction reaction) {
                 this(disableButton, Optional.empty(), Optional.of(reaction));
             }
 

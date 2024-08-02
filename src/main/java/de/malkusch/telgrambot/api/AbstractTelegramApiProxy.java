@@ -1,10 +1,7 @@
 package de.malkusch.telgrambot.api;
 
-import de.malkusch.telgrambot.UpdateReceiver;
+import de.malkusch.telgrambot.*;
 import de.malkusch.telgrambot.Update.CallbackUpdate.CallbackId;
-import de.malkusch.telgrambot.MessageId;
-import de.malkusch.telgrambot.PinnedMessage;
-import de.malkusch.telgrambot.TelegramApi;
 import lombok.RequiredArgsConstructor;
 
 import java.util.Collection;

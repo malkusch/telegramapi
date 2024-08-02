@@ -10,7 +10,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import java.time.LocalDateTime;
 
 import static de.malkusch.telgrambot.PinnedMessage.NO_MESSAGE;
-import static de.malkusch.telgrambot.TelegramApi.Reaction.THUMBS_UP;
+import static de.malkusch.telgrambot.Reaction.THUMBS_UP;
 import static java.util.UUID.randomUUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

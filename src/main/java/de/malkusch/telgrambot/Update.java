@@ -12,10 +12,6 @@ public sealed interface Update {
         public boolean contains(Reaction reaction) {
             return reactions.contains(reaction);
         }
-
-        public static enum Reaction {
-            THUMBS_UP, IGNORED
-        }
     }
 
     record CallbackUpdate(MessageId id, CallbackId callbackId, Callback callback) implements Update {

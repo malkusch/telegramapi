@@ -7,7 +7,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 
 import java.util.concurrent.CountDownLatch;
 
-import static de.malkusch.telgrambot.Update.ReactionUpdate.Reaction.THUMBS_UP;
+import static de.malkusch.telgrambot.Reaction.THUMBS_UP;
 import static de.malkusch.telgrambot.UpdateReceiver.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
