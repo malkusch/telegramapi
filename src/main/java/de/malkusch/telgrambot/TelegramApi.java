@@ -1,16 +1,20 @@
 package de.malkusch.telgrambot;
 
-import de.malkusch.telgrambot.Update.CallbackUpdate.Callback;
 import de.malkusch.telgrambot.Update.CallbackUpdate.CallbackId;
 import de.malkusch.telgrambot.api.TelegramApiFactory;
+import de.malkusch.telgrambot.api.Timeouts;
 
 import java.time.Duration;
 import java.util.Collection;
 
 public interface TelegramApi extends AutoCloseable {
 
+    static TelegramApi telegramApi(String chatId, String token, Timeouts timeouts) {
+        return TelegramApiFactory.telegramApi(chatId, token, timeouts);
+    }
+
     static TelegramApi telegramApi(String chatId, String token, Duration timeout) {
-        return TelegramApiFactory.telegramApi(chatId, token, timeout);
+        return telegramApi(chatId, token, new Timeouts(timeout));
     }
 
     void receiveUpdates(UpdateReceiver... receivers);

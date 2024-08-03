@@ -66,7 +66,7 @@ public interface UpdateReceiver {
 
     @FunctionalInterface
     interface CallbackReceiver {
-        CallbackReceiver.Result receive(CallbackUpdate callback);
+        CallbackReceiver.Result receive(CallbackUpdate update);
 
         record Result(boolean disableButton, Optional<String> alert, Optional<Reaction> reaction) {
 

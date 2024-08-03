@@ -6,7 +6,7 @@ import de.malkusch.telgrambot.MessageId;
 import de.malkusch.telgrambot.Reaction;
 import de.malkusch.telgrambot.Update;
 import de.malkusch.telgrambot.Update.CallbackUpdate;
-import de.malkusch.telgrambot.Update.CallbackUpdate.Callback;
+import de.malkusch.telgrambot.Callback;
 import de.malkusch.telgrambot.Update.ReactionUpdate;
 import de.malkusch.telgrambot.Update.TextMessage;
 import de.malkusch.telgrambot.Update.UnknownUpdate;
