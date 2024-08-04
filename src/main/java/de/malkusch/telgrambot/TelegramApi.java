@@ -19,6 +19,8 @@ public interface TelegramApi extends AutoCloseable {
 
     void receiveUpdates(UpdateReceiver... receivers);
 
+    void dropPendingUpdates();
+
     record Button(String name, Callback callback) {
         public Button(String name, Command command) {
             this(name, new Callback(command));
@@ -48,7 +50,4 @@ public interface TelegramApi extends AutoCloseable {
     void answer(CallbackId id);
 
     void answer(CallbackId id, String alert);
-
-    void dropPendingUpdates();
-
 }

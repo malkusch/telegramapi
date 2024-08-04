@@ -58,6 +58,12 @@ final class TelegramHttpApi implements TelegramApi {
         api.setUpdatesListener(monitor.updateListener(dispatcher), monitor.exceptionHandler(dispatcher), request);
     }
 
+    public void dropPendingUpdates() {
+        var request = new DeleteWebhook() //
+                .dropPendingUpdates(true);
+        execute(request);
+    }
+
     public MessageId send(String message, Button... buttons) {
         var requestButtons = Arrays.stream(buttons) //
                 .map(it -> new InlineKeyboardButton(it.name()).callbackData(it.callback().toString())) //
@@ -71,7 +77,7 @@ final class TelegramHttpApi implements TelegramApi {
     public MessageId send(String message) {
         return send(new SendMessage(chatId, message));
     }
-    
+
     private MessageId send(SendMessage request) {
         var response = execute(request);
         if (response.message() == null) {
@@ -126,12 +132,6 @@ final class TelegramHttpApi implements TelegramApi {
 
     public void answer(CallbackId id, String alert) {
         execute(new AnswerCallbackQuery(id.id()).text(alert).showAlert(true));
-    }
-
-    public void dropPendingUpdates() {
-        var request = new DeleteWebhook() //
-                .dropPendingUpdates(true);
-        execute(request);
     }
 
     <T extends BaseRequest<T, R>, R extends BaseResponse> R execute(BaseRequest<T, R> request) {

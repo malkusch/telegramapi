@@ -30,6 +30,11 @@ public abstract class AbstractTelegramApiProxy implements TelegramApi {
     }
 
     @Override
+    public void dropPendingUpdates() {
+        delegateVoid(TelegramApi::dropPendingUpdates);
+    }
+
+    @Override
     public MessageId send(String message, Button... buttons) {
         return delegate(api -> api.send(message, buttons));
     }
@@ -87,11 +92,6 @@ public abstract class AbstractTelegramApiProxy implements TelegramApi {
     @Override
     public void answer(CallbackId id, String alert) {
         delegateVoid(api -> api.answer(id, alert));
-    }
-
-    @Override
-    public void dropPendingUpdates() {
-        delegateVoid(TelegramApi::dropPendingUpdates);
     }
 
     @Override
