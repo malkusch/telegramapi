@@ -14,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class ReceiveUpdatesIT {
 
     @RegisterExtension
-    static final TelegramBotTestExtension telegram = new TelegramBotTestExtension();
+    static final TelegramTestApi api = new TelegramTestApi();
 
     @Test
     @Timeout(30)
@@ -25,7 +25,7 @@ public class ReceiveUpdatesIT {
         var expectedReactions = new ExpectedUpdates("");
         var expectedCallbacks = new ExpectedUpdates("");
 
-        telegram.receiveUpdates(
+        api.receiveUpdates(
                 onCommand("A", () -> expectedCommands.receive("A")), //
                 onCommand("B", () -> expectedCommands.receive("B")), //
                 onCommand("unexpected", () -> expectedCommands.receive("unexpectedCommand")), //
@@ -42,15 +42,15 @@ public class ReceiveUpdatesIT {
         );
         Thread.sleep(200);
 
-        telegram.send("C");
-        telegram.send("C");
-        telegram.send("C");
-        telegram.send("A");
-        telegram.send("C");
-        telegram.send("B");
-        telegram.send("C");
-        telegram.send("B");
-        telegram.send("A");
+        api.send("C");
+        api.send("C");
+        api.send("C");
+        api.send("A");
+        api.send("C");
+        api.send("B");
+        api.send("C");
+        api.send("B");
+        api.send("A");
 
         expectedText.assertUpdatesReceived();
         expectedText2.assertUpdatesReceived();

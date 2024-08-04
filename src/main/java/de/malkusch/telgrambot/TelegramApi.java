@@ -27,6 +27,8 @@ public interface TelegramApi extends AutoCloseable {
 
     MessageId send(String message, Button... buttons);
 
+    MessageId send(String message);
+
     void pin(MessageId message);
 
     PinnedMessage pinned();
@@ -39,15 +41,13 @@ public interface TelegramApi extends AutoCloseable {
 
     void delete(Collection<MessageId> messages);
 
-    void disableButton(MessageId message);
+    void disableButtons(MessageId message);
 
     void react(MessageId message, Reaction reaction);
 
     void answer(CallbackId id);
 
     void answer(CallbackId id, String alert);
-
-    MessageId send(String message);
 
     void dropPendingUpdates();
 

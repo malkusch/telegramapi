@@ -46,7 +46,7 @@ public final class TelegramNullApi implements TelegramApi {
     }
 
     @Override
-    public void disableButton(MessageId message) {
+    public void disableButtons(MessageId message) {
     }
 
     @Override

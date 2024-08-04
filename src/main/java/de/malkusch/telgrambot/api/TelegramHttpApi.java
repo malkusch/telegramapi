@@ -68,6 +68,18 @@ final class TelegramHttpApi implements TelegramApi {
         return send(request);
     }
 
+    public MessageId send(String message) {
+        return send(new SendMessage(chatId, message));
+    }
+    
+    private MessageId send(SendMessage request) {
+        var response = execute(request);
+        if (response.message() == null) {
+            throw new RuntimeException("Sending to Telegram failed: empty message");
+        }
+        return new MessageId(response.message().messageId());
+    }
+
     public void pin(MessageId message) {
         var pin = new PinChatMessage(chatId, message.id()) //
                 .disableNotification(true);
@@ -96,7 +108,7 @@ final class TelegramHttpApi implements TelegramApi {
         execute(new DeleteMessages(chatId, intMessages));
     }
 
-    public void disableButton(MessageId messageId) {
+    public void disableButtons(MessageId messageId) {
         try {
             execute(new EditMessageReplyMarkup(chatId, messageId.id()));
         } catch (Exception e) {
@@ -114,18 +126,6 @@ final class TelegramHttpApi implements TelegramApi {
 
     public void answer(CallbackId id, String alert) {
         execute(new AnswerCallbackQuery(id.id()).text(alert).showAlert(true));
-    }
-
-    public MessageId send(String message) {
-        return send(new SendMessage(chatId, message));
-    }
-
-    private MessageId send(SendMessage request) {
-        var response = execute(request);
-        if (response.message() == null) {
-            throw new RuntimeException("Sending to Telegram failed: empty message");
-        }
-        return new MessageId(response.message().messageId());
     }
 
     public void dropPendingUpdates() {

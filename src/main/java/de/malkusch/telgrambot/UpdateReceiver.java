@@ -103,7 +103,7 @@ public interface UpdateReceiver {
                     () -> api.answer(callbackUpdate.callbackId()));
 
             if (result.disableButton) {
-                api.disableButton(callbackUpdate.id());
+                api.disableButtons(callbackUpdate.id());
             }
 
             result.reaction.ifPresent( //

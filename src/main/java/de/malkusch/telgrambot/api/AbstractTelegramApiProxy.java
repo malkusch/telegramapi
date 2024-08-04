@@ -35,6 +35,11 @@ public abstract class AbstractTelegramApiProxy implements TelegramApi {
     }
 
     @Override
+    public MessageId send(String message) {
+        return delegate(api -> api.send(message));
+    }
+
+    @Override
     public void pin(MessageId message) {
         delegateVoid(api -> api.pin(message));
     }
@@ -65,8 +70,8 @@ public abstract class AbstractTelegramApiProxy implements TelegramApi {
     }
 
     @Override
-    public void disableButton(MessageId message) {
-        delegateVoid(api -> api.disableButton(message));
+    public void disableButtons(MessageId message) {
+        delegateVoid(api -> api.disableButtons(message));
     }
 
     @Override
@@ -82,11 +87,6 @@ public abstract class AbstractTelegramApiProxy implements TelegramApi {
     @Override
     public void answer(CallbackId id, String alert) {
         delegateVoid(api -> api.answer(id, alert));
-    }
-
-    @Override
-    public MessageId send(String message) {
-        return delegate(api -> api.send(message));
     }
 
     @Override

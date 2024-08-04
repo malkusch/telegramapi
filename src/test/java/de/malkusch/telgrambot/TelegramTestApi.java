@@ -14,12 +14,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.extension.ConditionEvaluationResult.disabled;
 import static org.junit.jupiter.api.extension.ConditionEvaluationResult.enabled;
 
-public class TelegramBotTestExtension extends AbstractTelegramApiProxy implements BeforeAllCallback, AfterEachCallback, AfterAllCallback, ExecutionCondition {
+public class TelegramTestApi extends AbstractTelegramApiProxy implements BeforeAllCallback, AfterEachCallback, AfterAllCallback, ExecutionCondition {
 
     private static final String CHAT_ID = System.getenv("TELEGRAM_CHAT_ID");
     private static final String TOKEN = System.getenv("TELEGRAM_TOKEN");
 
-    public TelegramBotTestExtension() {
+    public TelegramTestApi() {
         super(telegramApi(CHAT_ID, TOKEN, Duration.ofSeconds(10)));
     }
 
