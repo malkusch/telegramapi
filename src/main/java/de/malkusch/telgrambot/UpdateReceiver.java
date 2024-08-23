@@ -6,6 +6,8 @@ import de.malkusch.telgrambot.Update.TextMessage;
 
 import java.util.Optional;
 
+import static java.util.Objects.requireNonNull;
+
 public interface UpdateReceiver {
 
     void receive(TelegramApi api, Update update);
@@ -69,6 +71,11 @@ public interface UpdateReceiver {
         CallbackReceiver.Result receive(CallbackUpdate update);
 
         record Result(boolean disableButton, Optional<String> alert, Optional<Reaction> reaction) {
+
+            public Result {
+                requireNonNull(alert);
+                requireNonNull(reaction);
+            }
 
             public Result(boolean disableButton) {
                 this(disableButton, Optional.empty(), Optional.empty());

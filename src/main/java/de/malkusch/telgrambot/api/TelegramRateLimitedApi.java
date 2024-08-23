@@ -8,6 +8,8 @@ import de.malkusch.telgrambot.UpdateReceiver;
 import java.time.Duration;
 import java.util.function.Function;
 
+import static java.util.Objects.requireNonNull;
+
 final class TelegramRateLimitedApi extends AbstractTelegramApiProxy {
 
     private final RateLimiter groupLimit;
@@ -16,6 +18,7 @@ final class TelegramRateLimitedApi extends AbstractTelegramApiProxy {
 
     public TelegramRateLimitedApi(TelegramApi api, Timeouts timeouts) {
         super(api);
+        requireNonNull(timeouts);
 
         groupLimit = new RateLimiter(Duration.ofMinutes(1), 19, timeouts.groupThrottle(), "group");
         messageLimit = new RateLimiter(Duration.ofSeconds(1), 29, timeouts.messageThrottle(), "message");

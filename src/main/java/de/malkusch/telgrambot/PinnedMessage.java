@@ -1,25 +1,44 @@
 package de.malkusch.telgrambot;
 
-import com.pengrad.telegrambot.model.ChatFullInfo;
-import com.pengrad.telegrambot.model.request.InlineKeyboardMarkup;
-
-import java.util.Arrays;
 import java.util.List;
 
 import static java.util.Arrays.asList;
 import static java.util.Arrays.stream;
-import static java.util.Optional.ofNullable;
+import static java.util.Objects.requireNonNull;
 
 public sealed interface PinnedMessage {
 
     NoMessage NO_MESSAGE = new NoMessage();
+
     record NoMessage() implements PinnedMessage {
     }
 
     record TextMessage(MessageId id, String text) implements PinnedMessage {
+
+        public TextMessage {
+            requireNonNull(id);
+            requireNonNull(text);
+            if (text.isBlank()) {
+                throw new IllegalArgumentException("text must not be empty");
+            }
+        }
     }
 
     record CallbackMessage(MessageId id, String text, List<Button> buttons) implements PinnedMessage {
+
+        public CallbackMessage {
+            requireNonNull(id);
+
+            requireNonNull(text);
+            if (text.isBlank()) {
+                throw new IllegalArgumentException("text must not be empty");
+            }
+
+            requireNonNull(buttons);
+            if (buttons.isEmpty()) {
+                throw new IllegalArgumentException("buttons must not be empty");
+            }
+        }
 
         CallbackMessage(MessageId id, String text, Button... buttons) {
             this(id, text, asList(buttons));

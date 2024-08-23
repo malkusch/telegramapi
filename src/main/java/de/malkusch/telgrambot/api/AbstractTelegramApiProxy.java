@@ -2,16 +2,20 @@ package de.malkusch.telgrambot.api;
 
 import de.malkusch.telgrambot.*;
 import de.malkusch.telgrambot.Update.CallbackUpdate.CallbackId;
-import lombok.RequiredArgsConstructor;
 
 import java.util.Collection;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-@RequiredArgsConstructor
+import static java.util.Objects.requireNonNull;
+
 public abstract class AbstractTelegramApiProxy implements TelegramApi {
 
     protected final TelegramApi api;
+
+    protected AbstractTelegramApiProxy(TelegramApi api) {
+        this.api = requireNonNull(api);
+    }
 
     protected <R> R delegate(Function<TelegramApi, R> call) {
         return call.apply(api);

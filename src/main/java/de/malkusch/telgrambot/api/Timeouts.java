@@ -3,8 +3,22 @@ package de.malkusch.telgrambot.api;
 import java.time.Duration;
 
 import static java.lang.Math.round;
+import static java.time.Duration.ZERO;
+import static java.util.Objects.requireNonNull;
 
 public record Timeouts(Duration io, Duration polling) {
+
+    public Timeouts {
+        assertPositive(io, "io timeout");
+        assertPositive(polling, "polling timeout");
+    }
+
+    static void assertPositive(Duration duration, String name) {
+        requireNonNull(duration);
+        if (duration.compareTo(ZERO) <= 0) {
+            throw new IllegalArgumentException(name + " must be positive");
+        }
+    }
 
     public Timeouts(Duration io) {
         this(io, multiply(io, 10));

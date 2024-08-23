@@ -12,6 +12,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import static java.lang.System.Logger.Level.*;
+import static java.util.Objects.requireNonNull;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 final class ConnectionMonitoring implements AutoCloseable {
@@ -23,7 +24,7 @@ final class ConnectionMonitoring implements AutoCloseable {
     private final ScheduledExecutorService executor;
 
     public ConnectionMonitoring(Timeouts timeouts) {
-        this.timeouts = timeouts;
+        this.timeouts = requireNonNull(timeouts);
 
         this.executor = Executors.newSingleThreadScheduledExecutor(r -> {
             var t = new Thread(r, "telegram-monitor");

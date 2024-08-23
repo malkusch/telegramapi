@@ -5,11 +5,24 @@ import io.github.resilience4j.ratelimiter.RateLimiterRegistry;
 
 import java.time.Duration;
 
+import static de.malkusch.telgrambot.api.Timeouts.assertPositive;
+import static java.util.Objects.requireNonNull;
+
 final class RateLimiter implements AutoCloseable {
 
     private final io.github.resilience4j.ratelimiter.RateLimiter limiter;
 
     RateLimiter(Duration period, int limit, Duration throttle, String name) {
+        assertPositive(period, "period");
+        assertPositive(throttle, "throttle");
+        if (limit <= 0) {
+            throw new IllegalArgumentException("limit must be positive");
+        }
+        requireNonNull(name);
+        if (name.isBlank()) {
+            throw new IllegalArgumentException("name must not be empty");
+        }
+
         var config = RateLimiterConfig.custom()
                 .timeoutDuration(throttle)
                 .limitRefreshPeriod(period)

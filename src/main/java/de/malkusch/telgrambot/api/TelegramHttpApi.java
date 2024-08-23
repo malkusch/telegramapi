@@ -14,6 +14,7 @@ import java.util.Arrays;
 import java.util.Collection;
 
 import static de.malkusch.telgrambot.api.PinnedMessageFactory.pinnedMessage;
+import static java.util.Objects.requireNonNull;
 
 final class TelegramHttpApi implements TelegramApi {
 
@@ -48,6 +49,11 @@ final class TelegramHttpApi implements TelegramApi {
     }
 
     public void receiveUpdates(UpdateReceiver... receivers) {
+        requireNonNull(receivers);
+        if (receivers.length == 0) {
+            throw new IllegalArgumentException("Receivers must not be empty");
+        }
+
         var dispatcher = new UpdateDispatcher(receivers, this);
 
         var request = new GetUpdates() //
@@ -65,6 +71,12 @@ final class TelegramHttpApi implements TelegramApi {
     }
 
     public MessageId send(String message, Button... buttons) {
+        requireNonNull(message);
+        requireNonNull(buttons);
+        if (buttons.length == 0) {
+            throw new IllegalArgumentException("buttons must not be empty");
+        }
+
         var requestButtons = Arrays.stream(buttons) //
                 .map(it -> new InlineKeyboardButton(it.name()).callbackData(it.callback().toString())) //
                 .toArray(InlineKeyboardButton[]::new);
@@ -75,6 +87,7 @@ final class TelegramHttpApi implements TelegramApi {
     }
 
     public MessageId send(String message) {
+        requireNonNull(message);
         return send(new SendMessage(chatId, message));
     }
 
@@ -87,6 +100,7 @@ final class TelegramHttpApi implements TelegramApi {
     }
 
     public void pin(MessageId message) {
+        requireNonNull(message);
         var pin = new PinChatMessage(chatId, message.id()) //
                 .disableNotification(true);
         execute(pin);
@@ -98,6 +112,7 @@ final class TelegramHttpApi implements TelegramApi {
     }
 
     public void unpin(MessageId message) {
+        requireNonNull(message);
         execute(new UnpinChatMessage(chatId).messageId(message.id()));
     }
 
@@ -106,31 +121,43 @@ final class TelegramHttpApi implements TelegramApi {
     }
 
     public void delete(MessageId message) {
+        requireNonNull(message);
         execute(new DeleteMessage(chatId, message.id()));
     }
 
     public void delete(Collection<MessageId> messages) {
+        requireNonNull(messages);
+        if (messages.isEmpty()) {
+            return;
+        }
+
         var intMessages = messages.stream().mapToInt(MessageId::id).toArray();
         execute(new DeleteMessages(chatId, intMessages));
     }
 
-    public void disableButtons(MessageId messageId) {
+    public void disableButtons(MessageId message) {
+        requireNonNull(message);
         try {
-            execute(new EditMessageReplyMarkup(chatId, messageId.id()));
+            execute(new EditMessageReplyMarkup(chatId, message.id()));
         } catch (Exception e) {
             // Ignore
         }
     }
 
-    public void react(MessageId messageId, Reaction reaction) {
-        execute(new SetMessageReaction(chatId, messageId.id(), new ReactionTypeEmoji(reaction.emoji())));
+    public void react(MessageId message, Reaction reaction) {
+        requireNonNull(message);
+        requireNonNull(reaction);
+        execute(new SetMessageReaction(chatId, message.id(), new ReactionTypeEmoji(reaction.emoji())));
     }
 
     public void answer(CallbackId id) {
+        requireNonNull(id);
         execute(new AnswerCallbackQuery(id.id()));
     }
 
     public void answer(CallbackId id, String alert) {
+        requireNonNull(id);
+        requireNonNull(alert);
         execute(new AnswerCallbackQuery(id.id()).text(alert).showAlert(true));
     }
 
