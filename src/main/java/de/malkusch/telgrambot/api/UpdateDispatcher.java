@@ -4,25 +4,26 @@ import com.pengrad.telegrambot.ExceptionHandler;
 import com.pengrad.telegrambot.TelegramException;
 import com.pengrad.telegrambot.UpdatesListener;
 import com.pengrad.telegrambot.model.Update;
-import de.malkusch.telgrambot.UpdateReceiver;
 import de.malkusch.telgrambot.TelegramApi;
+import de.malkusch.telgrambot.UpdateReceiver;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 
 import static de.malkusch.telgrambot.api.UpdateFactory.update;
+import static java.lang.System.Logger.Level.DEBUG;
+import static java.lang.System.Logger.Level.WARNING;
 
 @RequiredArgsConstructor
-@Slf4j
 final class UpdateDispatcher implements ExceptionHandler, UpdatesListener {
 
+    private static final System.Logger log = System.getLogger(UpdateDispatcher.class.getName());
     private final UpdateReceiver[] receivers;
     private final TelegramApi api;
 
     @Override
     public int process(List<Update> updates) {
-        log.debug("Received {} updates", updates.size());
+        log.log(DEBUG, "Received {0} updates", updates.size());
         return updates.stream() //
                 .mapToInt(this::dispatch) //
                 .reduce((first, second) -> second) //
@@ -37,7 +38,7 @@ final class UpdateDispatcher implements ExceptionHandler, UpdatesListener {
                 handler.receive(api, update);
 
             } catch (Exception e) {
-                log.warn("Couldn't handle update {}", update, e);
+                log.log(WARNING, "Couldn't handle update " + update, e);
             }
         }
         return id;
@@ -45,6 +46,6 @@ final class UpdateDispatcher implements ExceptionHandler, UpdatesListener {
 
     @Override
     public void onException(TelegramException e) {
-        log.warn("Telegram update failed", e);
+        log.log(WARNING, "Telegram update failed", e);
     }
 }
