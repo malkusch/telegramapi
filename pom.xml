@@ -2,7 +2,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>de.malkusch.telegrambot</groupId>
     <artifactId>telegrambot</artifactId>
-    <version>0.0.22-SNAPSHOT</version>
+    <version>0.0.22</version>
     <description>Telegram Bot</description>
     <parent>
         <groupId>de.malkusch.parent</groupId>
