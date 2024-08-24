@@ -1,20 +1,20 @@
 package de.malkusch.telgrambot.api;
 
+import com.pengrad.telegrambot.model.message.MaybeInaccessibleMessage;
 import com.pengrad.telegrambot.model.reaction.ReactionType;
 import com.pengrad.telegrambot.model.reaction.ReactionTypeEmoji;
+import de.malkusch.telgrambot.Callback;
 import de.malkusch.telgrambot.MessageId;
 import de.malkusch.telgrambot.Reaction;
 import de.malkusch.telgrambot.Update;
 import de.malkusch.telgrambot.Update.CallbackUpdate;
-import de.malkusch.telgrambot.Callback;
 import de.malkusch.telgrambot.Update.ReactionUpdate;
 import de.malkusch.telgrambot.Update.TextMessage;
 import de.malkusch.telgrambot.Update.UnknownUpdate;
 
-import java.util.Optional;
-
 import static de.malkusch.telgrambot.Reaction.UNKNOWN;
 import static java.util.Arrays.stream;
+import static java.util.Optional.ofNullable;
 
 final class UpdateFactory {
 
@@ -38,8 +38,12 @@ final class UpdateFactory {
             var callbackId = new CallbackUpdate.CallbackId(update.callbackQuery().id());
             var data = update.callbackQuery().data();
             var callback = Callback.parse(data);
-            var id = new MessageId(update.callbackQuery().message().messageId());
-            return new CallbackUpdate(id, callbackId, callback);
+
+            return ofNullable(update.callbackQuery().maybeInaccessibleMessage()) //
+                    .map(MaybeInaccessibleMessage::messageId) //
+                    .map(MessageId::new) //
+                    .map(id -> (Update) new CallbackUpdate(id, callbackId, callback)) //
+                    .orElse(new UnknownUpdate());
         }
 
         return new UnknownUpdate();
@@ -47,7 +51,7 @@ final class UpdateFactory {
 
     private static Reaction reaction(ReactionType reaction) {
         if (reaction instanceof ReactionTypeEmoji emoji) {
-            return Optional.ofNullable(emoji.emoji()) //
+            return ofNullable(emoji.emoji()) //
                     .map(Reaction::new) //
                     .orElse(UNKNOWN);
         }
