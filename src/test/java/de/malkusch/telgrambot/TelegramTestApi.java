@@ -20,7 +20,14 @@ public class TelegramTestApi extends AbstractTelegramApiProxy implements BeforeA
     private static final String TOKEN = System.getenv("TELEGRAM_TOKEN");
 
     public TelegramTestApi() {
-        super(telegramApi(CHAT_ID, TOKEN, Duration.ofSeconds(10)));
+        super(telegramApi(fallback(CHAT_ID), fallback(TOKEN), Duration.ofSeconds(10)));
+    }
+
+    private static String fallback(String arg) {
+        if (arg == null || arg.isBlank()) {
+            return "default";
+        }
+        return arg;
     }
 
     @Override
