@@ -14,6 +14,10 @@ public record Callback(Command command, String data) {
         if (data.isBlank()) {
             throw new IllegalArgumentException("data must not be empty");
         }
+        String payload = payload(command, data);
+        if (payload.length() > 64) {
+            throw new IllegalArgumentException("payload must not be bigger than 64 bytes: " + payload);
+        }
     }
 
     public static Callback parse(String callback) {
@@ -32,8 +36,12 @@ public record Callback(Command command, String data) {
         return new Callback(command, data);
     }
 
+    private static String payload(Command command, String data) {
+         return command.name() + ":" + data;
+    }
+
     @Override
     public String toString() {
-        return command.name() + ":" + data;
+        return payload(command, data);
     }
 }
