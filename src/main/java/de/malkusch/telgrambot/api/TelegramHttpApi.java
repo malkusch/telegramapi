@@ -164,7 +164,7 @@ final class TelegramHttpApi implements TelegramApi {
     <T extends BaseRequest<T, R>, R extends BaseResponse> R execute(BaseRequest<T, R> request) {
         var response = api.execute(request);
         if (!response.isOk()) {
-            var error = String.format("Sending to Telegram failed: [%d] %s", response.errorCode(), response.description());
+            var error = String.format("Sending to Telegram failed: [%d] %s\n%s", response.errorCode(), response.description(), request.toWebhookResponse());
             throw new RuntimeException(error);
         }
         return response;
