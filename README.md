@@ -5,6 +5,6 @@ This package is available in Maven central:
 <dependency>
   <groupId>de.malkusch.telegrambot</groupId>
   <artifactId>telegrambot</artifactId>
-  <version>0.0.30</version>
+  <version>0.0.31</version>
 </dependency>
 ```
