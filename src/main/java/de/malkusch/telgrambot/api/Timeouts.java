@@ -24,7 +24,19 @@ public record Timeouts(Duration io, Duration polling) {
         this(io, multiply(io, 10));
     }
 
+    public Duration circuitBreaker() {
+        return polling(10);
+    }
+
     public Duration monitoring() {
+        return polling(5);
+    }
+
+    public Duration keepAlive() {
+        return polling(2.2);
+    }
+
+    public Duration updateSleep() {
         return polling(2);
     }
 
@@ -40,28 +52,16 @@ public record Timeouts(Duration io, Duration polling) {
         return polling(1.1);
     }
 
-    public Duration pinThrottle() {
-        return polling(0.5);
-    }
-
-    public Duration updateSleep() {
-        return io();
-    }
-
     public Duration ping() {
         return polling(0.8);
     }
 
-    public Duration circuitBreaker() {
-        return polling(10);
+    public Duration pinThrottle() {
+        return polling(0.5);
     }
 
     private Duration polling(double factor) {
         return multiply(polling, factor);
-    }
-
-    private Duration io(double factor) {
-        return multiply(io, factor);
     }
 
     private static Duration multiply(Duration duration, double factor) {

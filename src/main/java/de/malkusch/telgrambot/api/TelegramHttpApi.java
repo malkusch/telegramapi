@@ -13,6 +13,7 @@ import de.malkusch.telgrambot.PinnedMessage;
 import de.malkusch.telgrambot.Reaction;
 import de.malkusch.telgrambot.Update.CallbackUpdate.CallbackId;
 import de.malkusch.telgrambot.UpdateReceiver;
+import okhttp3.ConnectionPool;
 import okhttp3.OkHttpClient;
 
 import java.util.Arrays;
@@ -20,6 +21,7 @@ import java.util.Collection;
 
 import static de.malkusch.telgrambot.api.PinnedMessageFactory.pinnedMessage;
 import static java.util.Objects.requireNonNull;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 final class TelegramHttpApi implements InternalTelegramApi {
 
@@ -45,6 +47,7 @@ final class TelegramHttpApi implements InternalTelegramApi {
                 .readTimeout(timeouts.io()) //
                 .retryOnConnectionFailure(true) //
                 .addInterceptor(monitor.interceptor()) //
+                .connectionPool(new ConnectionPool(5, timeouts.keepAlive().toMillis(), MILLISECONDS)) //
                 .build();
 
         return new TelegramBot.Builder(token) //
