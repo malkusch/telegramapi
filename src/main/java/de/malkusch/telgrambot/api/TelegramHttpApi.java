@@ -1,13 +1,18 @@
 package de.malkusch.telgrambot.api;
 
+import com.pengrad.telegrambot.ExceptionHandler;
 import com.pengrad.telegrambot.TelegramBot;
+import com.pengrad.telegrambot.UpdatesListener;
 import com.pengrad.telegrambot.model.reaction.ReactionTypeEmoji;
 import com.pengrad.telegrambot.model.request.InlineKeyboardButton;
 import com.pengrad.telegrambot.model.request.InlineKeyboardMarkup;
 import com.pengrad.telegrambot.request.*;
 import com.pengrad.telegrambot.response.BaseResponse;
-import de.malkusch.telgrambot.*;
+import de.malkusch.telgrambot.MessageId;
+import de.malkusch.telgrambot.PinnedMessage;
+import de.malkusch.telgrambot.Reaction;
 import de.malkusch.telgrambot.Update.CallbackUpdate.CallbackId;
+import de.malkusch.telgrambot.UpdateReceiver;
 import okhttp3.OkHttpClient;
 
 import java.util.Arrays;
@@ -16,7 +21,7 @@ import java.util.Collection;
 import static de.malkusch.telgrambot.api.PinnedMessageFactory.pinnedMessage;
 import static java.util.Objects.requireNonNull;
 
-final class TelegramHttpApi implements TelegramApi {
+final class TelegramHttpApi implements InternalTelegramApi {
 
     private final TelegramBot api;
     private final String chatId;
@@ -48,7 +53,8 @@ final class TelegramHttpApi implements TelegramApi {
                 .build();
     }
 
-    public void receiveUpdates(UpdateReceiver... receivers) {
+    @Override
+    public void receiveUpdates(Decorator<UpdatesListener> listenerDecorator, Decorator<ExceptionHandler> errorDecorator, UpdateReceiver... receivers) {
         requireNonNull(receivers);
         if (receivers.length == 0) {
             throw new IllegalArgumentException("Receivers must not be empty");
@@ -61,7 +67,10 @@ final class TelegramHttpApi implements TelegramApi {
                 .allowedUpdates("message", "message_reaction", "callback_query");
 
         monitor.startMonitoring();
-        api.setUpdatesListener(monitor.updateListener(dispatcher), monitor.exceptionHandler(dispatcher), request);
+        api.setUpdatesListener(
+                listenerDecorator.decorate(monitor.updateListener(dispatcher)),
+                errorDecorator.decorate(monitor.exceptionHandler(dispatcher)),
+                request);
     }
 
     public void dropPendingUpdates() {

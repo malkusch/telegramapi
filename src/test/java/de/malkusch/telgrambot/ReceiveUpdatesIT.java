@@ -1,6 +1,7 @@
 package de.malkusch.telgrambot;
 
 import de.malkusch.telgrambot.UpdateReceiver.CallbackReceiver.Result;
+import de.malkusch.telgrambot.api.TelegramTestApi;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.extension.RegisterExtension;

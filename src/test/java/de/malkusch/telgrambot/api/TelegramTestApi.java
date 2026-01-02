@@ -1,6 +1,7 @@
-package de.malkusch.telgrambot;
+package de.malkusch.telgrambot.api;
 
-import de.malkusch.telgrambot.api.AbstractTelegramApiProxy;
+import de.malkusch.telgrambot.MessageId;
+import de.malkusch.telgrambot.PinnedMessage;
 import org.junit.jupiter.api.extension.*;
 
 import java.time.Duration;
@@ -20,7 +21,7 @@ public class TelegramTestApi extends AbstractTelegramApiProxy implements BeforeA
     private static final String TOKEN = System.getenv("TELEGRAM_TOKEN");
 
     public TelegramTestApi() {
-        super(telegramApi(fallback(CHAT_ID), fallback(TOKEN), Duration.ofSeconds(10)));
+        super((InternalTelegramApi) telegramApi(fallback(CHAT_ID), fallback(TOKEN), Duration.ofSeconds(10)));
     }
 
     private static String fallback(String arg) {

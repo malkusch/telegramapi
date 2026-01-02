@@ -1,14 +1,13 @@
 package de.malkusch.telgrambot.api;
 
+import com.pengrad.telegrambot.ExceptionHandler;
+import com.pengrad.telegrambot.UpdatesListener;
 import de.malkusch.telgrambot.MessageId;
 import de.malkusch.telgrambot.PinnedMessage;
-import de.malkusch.telgrambot.TelegramApi;
 import de.malkusch.telgrambot.UpdateReceiver;
 
 import java.time.Duration;
 import java.util.function.Function;
-
-import static java.util.Objects.requireNonNull;
 
 final class TelegramRateLimitedApi extends AbstractTelegramApiProxy {
 
@@ -16,9 +15,8 @@ final class TelegramRateLimitedApi extends AbstractTelegramApiProxy {
     private final RateLimiter messageLimit;
     private final RateLimiter pinLimit;
 
-    public TelegramRateLimitedApi(TelegramApi api, Timeouts timeouts) {
+    public TelegramRateLimitedApi(InternalTelegramApi api, Timeouts timeouts) {
         super(api);
-        requireNonNull(timeouts);
 
         groupLimit = new RateLimiter(Duration.ofMinutes(1), 19, timeouts.groupThrottle(), "group");
         messageLimit = new RateLimiter(Duration.ofSeconds(1), 29, timeouts.messageThrottle(), "message");
@@ -26,12 +24,12 @@ final class TelegramRateLimitedApi extends AbstractTelegramApiProxy {
     }
 
     @Override
-    public void receiveUpdates(UpdateReceiver... receivers) {
-        api.receiveUpdates(receivers);
+    public void receiveUpdates(Decorator<UpdatesListener> listenerDecorator, Decorator<ExceptionHandler> errorDecorator, UpdateReceiver... receivers) {
+        api.receiveUpdates(listenerDecorator, errorDecorator, receivers);
     }
 
     @Override
-    protected <R> R delegate(Function<TelegramApi, R> call) {
+    protected <R> R delegate(Function<InternalTelegramApi, R> call) {
         messageLimit.acquire();
         groupLimit.acquire();
         return super.delegate(call);

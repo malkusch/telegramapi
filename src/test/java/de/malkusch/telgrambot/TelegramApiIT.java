@@ -3,6 +3,7 @@ package de.malkusch.telgrambot;
 import de.malkusch.telgrambot.PinnedMessage.CallbackMessage;
 import de.malkusch.telgrambot.PinnedMessage.TextMessage;
 import de.malkusch.telgrambot.TelegramApi.Button;
+import de.malkusch.telgrambot.api.TelegramTestApi;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 

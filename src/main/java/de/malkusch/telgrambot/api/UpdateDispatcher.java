@@ -28,28 +28,18 @@ final class UpdateDispatcher implements ExceptionHandler, UpdatesListener {
     @Override
     public int process(List<Update> updates) {
         log.log(DEBUG, "Received {0} updates", updates.size());
-        try {
-            return updates.stream() //
-                    .mapToInt(this::dispatch) //
-                    .reduce((first, second) -> second) //
-                    .orElse(CONFIRMED_UPDATES_ALL);
+        return updates.stream() //
+                .mapToInt(this::dispatch) //
+                .reduce((first, second) -> second) //
+                .orElse(CONFIRMED_UPDATES_ALL);
 
-        } catch (Exception e) {
-            log.log(WARNING, "Failed receive updates", e);
-            return CONFIRMED_UPDATES_ALL;
-        }
     }
 
     private int dispatch(Update apiUpdate) {
         var id = apiUpdate.updateId();
         var update = update(apiUpdate);
         for (var receiver : receivers) {
-            try {
-                receiver.receive(api, update);
-
-            } catch (Exception e) {
-                log.log(WARNING, "Failed receiving update " + update + " in receiver " + receiver, e);
-            }
+            receiver.receive(api, update);
         }
         return id;
     }

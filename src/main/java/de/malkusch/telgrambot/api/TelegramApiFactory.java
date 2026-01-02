@@ -19,8 +19,9 @@ public final class TelegramApiFactory {
             throw new IllegalArgumentException("token must not be empty");
         }
 
-        TelegramApi api = new TelegramHttpApi(chatId, token, timeouts);
+        InternalTelegramApi api = new TelegramHttpApi(chatId, token, timeouts);
         api = new TelegramRateLimitedApi(api, timeouts);
+        api = new TelegramCircuitBreakerApi(api, timeouts);
         return api;
     }
 }

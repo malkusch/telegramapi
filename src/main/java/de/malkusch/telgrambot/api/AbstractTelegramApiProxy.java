@@ -1,5 +1,7 @@
 package de.malkusch.telgrambot.api;
 
+import com.pengrad.telegrambot.ExceptionHandler;
+import com.pengrad.telegrambot.UpdatesListener;
 import de.malkusch.telgrambot.*;
 import de.malkusch.telgrambot.Update.CallbackUpdate.CallbackId;
 
@@ -7,21 +9,19 @@ import java.util.Collection;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import static java.util.Objects.requireNonNull;
+abstract class AbstractTelegramApiProxy implements InternalTelegramApi {
 
-public abstract class AbstractTelegramApiProxy implements TelegramApi {
+    protected final InternalTelegramApi api;
 
-    protected final TelegramApi api;
-
-    protected AbstractTelegramApiProxy(TelegramApi api) {
-        this.api = requireNonNull(api);
+    protected AbstractTelegramApiProxy(InternalTelegramApi api) {
+        this.api = api;
     }
 
-    protected <R> R delegate(Function<TelegramApi, R> call) {
+    protected <R> R delegate(Function<InternalTelegramApi, R> call) {
         return call.apply(api);
     }
 
-    private void delegateVoid(Consumer<TelegramApi> call) {
+    private void delegateVoid(Consumer<InternalTelegramApi> call) {
         delegate(api -> {
             call.accept(api);
             return null;
@@ -29,8 +29,8 @@ public abstract class AbstractTelegramApiProxy implements TelegramApi {
     }
 
     @Override
-    public void receiveUpdates(UpdateReceiver... receivers) {
-        delegateVoid(api -> api.receiveUpdates(receivers));
+    public void receiveUpdates(Decorator<UpdatesListener> listenerDecorator, Decorator<ExceptionHandler> errorDecorator, UpdateReceiver... receivers) {
+        delegateVoid(api -> api.receiveUpdates(listenerDecorator, errorDecorator, receivers));
     }
 
     @Override

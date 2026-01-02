@@ -52,6 +52,10 @@ public record Timeouts(Duration io, Duration polling) {
         return polling(0.8);
     }
 
+    public Duration circuitBreaker() {
+        return polling(10);
+    }
+
     private Duration polling(double factor) {
         return multiply(polling, factor);
     }
