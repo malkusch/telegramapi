@@ -36,10 +36,6 @@ public record Timeouts(Duration io, Duration polling) {
         return polling(2.2);
     }
 
-    public Duration updateSleep() {
-        return polling(2);
-    }
-
     public Duration call() {
         return polling(1.2);
     }
@@ -57,6 +53,10 @@ public record Timeouts(Duration io, Duration polling) {
     }
 
     public Duration pinThrottle() {
+        return polling(0.5);
+    }
+
+    public Duration updateSleep() {
         return polling(0.5);
     }
 
