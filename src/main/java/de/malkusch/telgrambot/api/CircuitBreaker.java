@@ -62,8 +62,8 @@ final class CircuitBreaker implements AutoCloseable {
     }
 
     public void error(Throwable e, Runnable runnable) {
-        circuitBreaker.onError(1, MILLISECONDS, e);
         if (circuitBreaker.tryAcquirePermission()) {
+            circuitBreaker.onError(1, MILLISECONDS, e);
             runnable.run();
         }
     }
