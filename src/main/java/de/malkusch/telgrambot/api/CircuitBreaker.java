@@ -11,8 +11,7 @@ import java.util.function.Supplier;
 
 import static com.pengrad.telegrambot.UpdatesListener.CONFIRMED_UPDATES_ALL;
 import static io.github.resilience4j.circuitbreaker.CircuitBreaker.State.OPEN;
-import static java.lang.System.Logger.Level.DEBUG;
-import static java.lang.System.Logger.Level.WARNING;
+import static java.lang.System.Logger.Level.*;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 final class CircuitBreaker implements AutoCloseable {
@@ -36,6 +35,14 @@ final class CircuitBreaker implements AutoCloseable {
 
         circuitBreakerRegistry = CircuitBreakerRegistry.ofDefaults();
         circuitBreaker = circuitBreakerRegistry.circuitBreaker(CIRCUIT_BREAKER_NAME, circuitBreakerConfig);
+
+        circuitBreaker.getEventPublisher().onStateTransition(it -> {
+            switch (it.getStateTransition()) {
+                case CLOSED_TO_METRICS_ONLY -> log.log(WARNING, "Circuit Breaker opened");
+                case OPEN_TO_HALF_OPEN -> log.log(INFO, "Circuit Breaker half opened");
+                case OPEN_TO_CLOSED, HALF_OPEN_TO_CLOSED -> log.log(INFO, "Circuit Breaker closed");
+            }
+        });
     }
 
     public UpdatesListener updatesListener(UpdatesListener updatesListener) {
