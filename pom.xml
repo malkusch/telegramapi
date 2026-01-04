@@ -2,7 +2,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>de.malkusch.telegrambot</groupId>
     <artifactId>telegrambot</artifactId>
-    <version>0.0.36-SNAPSHOT</version>
+    <version>0.0.36</version>
     <name>Telegram Bot</name>
     <description>Telegram Bot</description>
     <parent>
@@ -15,7 +15,7 @@
         <connection>scm:git:${project.scm.url}</connection>
         <developerConnection>scm:git:${project.scm.url}</developerConnection>
         <url>https://github.com/malkusch/telegramapi</url>
-        <tag>HEAD</tag>
+        <tag>telegrambot-0.0.36</tag>
     </scm>
     <properties>
         <maven.compiler.release>17</maven.compiler.release>
