@@ -6,7 +6,7 @@ import static java.lang.Math.round;
 import static java.time.Duration.ZERO;
 import static java.util.Objects.requireNonNull;
 
-public record Timeouts(Duration io, Duration polling) {
+public record Timeouts(Duration io, Duration polling, Duration updateSleep) {
 
     public Timeouts {
         assertPositive(io, "io timeout");
@@ -18,6 +18,10 @@ public record Timeouts(Duration io, Duration polling) {
         if (duration.compareTo(ZERO) <= 0) {
             throw new IllegalArgumentException(name + " must be positive");
         }
+    }
+
+    public Timeouts(Duration io, Duration polling) {
+        this(io, polling, ZERO);
     }
 
     public Timeouts(Duration io) {
@@ -53,10 +57,6 @@ public record Timeouts(Duration io, Duration polling) {
     }
 
     public Duration pinThrottle() {
-        return polling(0.5);
-    }
-
-    public Duration updateSleep() {
         return polling(0.5);
     }
 

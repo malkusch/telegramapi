@@ -50,10 +50,14 @@ final class TelegramHttpApi implements InternalTelegramApi {
                 .connectionPool(new ConnectionPool(5, timeouts.keepAlive().toMillis(), MILLISECONDS)) //
                 .build();
 
-        return new TelegramBot.Builder(token) //
-                .okHttpClient(http) //
-                .updateListenerSleep(timeouts.updateSleep().toMillis()) //
-                .build();
+        var builder = new TelegramBot.Builder(token) //
+                .okHttpClient(http);
+
+        if (!timeouts.updateSleep().isZero()) {
+            builder.updateListenerSleep(timeouts.updateSleep().toMillis());
+        }
+
+        return builder.build();
     }
 
     @Override
