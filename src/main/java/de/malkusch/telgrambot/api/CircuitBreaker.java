@@ -30,7 +30,6 @@ final class CircuitBreaker implements AutoCloseable {
     CircuitBreaker(Timeouts timeouts) {
         var circuitBreakerConfig = CircuitBreakerConfig.custom()
                 .waitDurationInOpenState(timeouts.circuitBreaker())
-                .enableAutomaticTransitionFromOpenToHalfOpen()
                 .build();
 
         circuitBreakerRegistry = CircuitBreakerRegistry.ofDefaults();
