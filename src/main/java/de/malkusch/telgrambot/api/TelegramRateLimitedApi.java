@@ -20,7 +20,7 @@ final class TelegramRateLimitedApi extends AbstractTelegramApiProxy {
 
         groupLimit = new RateLimiter(Duration.ofMinutes(1), 19, timeouts.groupThrottle(), "group");
         messageLimit = new RateLimiter(Duration.ofSeconds(1), 29, timeouts.messageThrottle(), "message");
-        pinLimit = new RateLimiter(Duration.ofSeconds(1), 2, timeouts.pinThrottle(), "pin");
+        pinLimit = new RateLimiter(Duration.ofSeconds(2), 1, timeouts.pinThrottle(), "pin");
     }
 
     @Override
