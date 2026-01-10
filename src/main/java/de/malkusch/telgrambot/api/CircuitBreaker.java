@@ -37,7 +37,7 @@ final class CircuitBreaker implements AutoCloseable {
 
         circuitBreaker.getEventPublisher().onStateTransition(it -> {
             switch (it.getStateTransition()) {
-                case CLOSED_TO_METRICS_ONLY -> log.log(WARNING, "Circuit Breaker opened");
+                case CLOSED_TO_OPEN, HALF_OPEN_TO_OPEN -> log.log(WARNING, "Circuit Breaker opened");
                 case OPEN_TO_HALF_OPEN -> log.log(INFO, "Circuit Breaker half opened");
                 case OPEN_TO_CLOSED, HALF_OPEN_TO_CLOSED -> log.log(INFO, "Circuit Breaker closed");
             }
