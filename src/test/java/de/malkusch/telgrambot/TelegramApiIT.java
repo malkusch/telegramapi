@@ -29,6 +29,15 @@ public class TelegramApiIT {
     }
 
     @Test
+    public void shouldSendSilentlyMessage() {
+        var message = String.format("shouldSendSilentlyMessage %s %s", LocalDateTime.now(), randomUUID());
+
+        var id = api.sendSilently(message);
+
+        assertEquals(new TextMessage(id, message), api.fetchMessage(id));
+    }
+
+    @Test
     public void shouldSendMessageWithButtons() {
         var message = String.format("shouldSendMessageWithButtons %s %s", LocalDateTime.now(), randomUUID());
         var button1 = new Button("button1", new Callback(new Command("command1"), "payload"));
@@ -37,6 +46,19 @@ public class TelegramApiIT {
                 "6789 123456789 123456789 123456789 123456789 123456789 123"));
 
         var id = api.send(message, button1, button2, button3);
+
+        assertEquals(new CallbackMessage(id, message, button1, button2, button3), api.fetchMessage(id));
+    }
+
+    @Test
+    public void shouldSendSilentlyMessageWithButtons() {
+        var message = String.format("shouldSendSilentlyMessageWithButtons %s %s", LocalDateTime.now(), randomUUID());
+        var button1 = new Button("button1", new Callback(new Command("command1"), "payload"));
+        var button2 = new Button("button2", new Command("command2"));
+        var button3 = new Button("button3", new Callback(new Command("12345"),
+                "6789 123456789 123456789 123456789 123456789 123456789 123"));
+
+        var id = api.sendSilently(message, button1, button2, button3);
 
         assertEquals(new CallbackMessage(id, message, button1, button2, button3), api.fetchMessage(id));
     }

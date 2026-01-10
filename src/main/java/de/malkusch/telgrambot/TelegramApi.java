@@ -29,7 +29,11 @@ public interface TelegramApi extends AutoCloseable {
 
     MessageId send(String message, Button... buttons);
 
+    MessageId sendSilently(String message, Button... buttons);
+
     MessageId send(String message);
+
+    MessageId sendSilently(String message);
 
     void pin(MessageId message);
 

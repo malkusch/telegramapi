@@ -90,8 +90,22 @@ public class TelegramTestApi extends AbstractTelegramApiProxy implements BeforeA
     }
 
     @Override
+    public MessageId sendSilently(String text) {
+        var message = super.sendSilently(text);
+        messages.add(message);
+        return message;
+    }
+
+    @Override
     public MessageId send(String text, Button... buttons) {
         var message = super.send(text, buttons);
+        messages.add(message);
+        return message;
+    }
+
+    @Override
+    public MessageId sendSilently(String text, Button... buttons) {
+        var message = super.sendSilently(text, buttons);
         messages.add(message);
         return message;
     }

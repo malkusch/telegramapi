@@ -86,7 +86,15 @@ final class TelegramHttpApi implements InternalTelegramApi {
         execute(request);
     }
 
+    public MessageId sendSilently(String message, Button... buttons) {
+        return send(message, true, buttons);
+    }
+
     public MessageId send(String message, Button... buttons) {
+        return send(message, false, buttons);
+    }
+
+    private MessageId send(String message, boolean silently, Button... buttons) {
         requireNonNull(message);
         requireNonNull(buttons);
         if (buttons.length == 0) {
@@ -98,13 +106,20 @@ final class TelegramHttpApi implements InternalTelegramApi {
                 .toArray(InlineKeyboardButton[]::new);
 
         var keyboard = new InlineKeyboardMarkup(requestButtons);
-        var request = new SendMessage(chatId, message).replyMarkup(keyboard);
+        var request = new SendMessage(chatId, message)
+                .disableNotification(silently)
+                .replyMarkup(keyboard);
         return send(request);
     }
 
     public MessageId send(String message) {
         requireNonNull(message);
         return send(new SendMessage(chatId, message));
+    }
+
+    public MessageId sendSilently(String message) {
+        requireNonNull(message);
+        return send(new SendMessage(chatId, message).disableNotification(true));
     }
 
     private MessageId send(SendMessage request) {

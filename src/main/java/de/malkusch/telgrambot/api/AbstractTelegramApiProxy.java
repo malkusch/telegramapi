@@ -44,8 +44,18 @@ abstract class AbstractTelegramApiProxy implements InternalTelegramApi {
     }
 
     @Override
+    public MessageId sendSilently(String message, Button... buttons) {
+        return delegate(api -> api.sendSilently(message, buttons));
+    }
+
+    @Override
     public MessageId send(String message) {
         return delegate(api -> api.send(message));
+    }
+
+    @Override
+    public MessageId sendSilently(String message) {
+        return delegate(api -> api.sendSilently(message));
     }
 
     @Override

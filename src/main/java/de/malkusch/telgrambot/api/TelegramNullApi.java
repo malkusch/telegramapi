@@ -21,6 +21,11 @@ public final class TelegramNullApi implements TelegramApi {
     }
 
     @Override
+    public MessageId sendSilently(String message, Button... buttons) {
+        return NO_MESSAGE_ID;
+    }
+
+    @Override
     public void pin(MessageId message) {
     }
 
@@ -63,6 +68,11 @@ public final class TelegramNullApi implements TelegramApi {
 
     @Override
     public MessageId send(String message) {
+        return NO_MESSAGE_ID;
+    }
+
+    @Override
+    public MessageId sendSilently(String message) {
         return NO_MESSAGE_ID;
     }
 
