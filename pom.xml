@@ -25,7 +25,7 @@
         <dependency>
             <groupId>com.github.pengrad</groupId>
             <artifactId>java-telegram-bot-api</artifactId>
-            <version>9.3.0</version>
+            <version>9.4.0</version>
         </dependency>
         <dependency>
             <groupId>io.github.resilience4j</groupId>
